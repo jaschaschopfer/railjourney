@@ -396,3 +396,8 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# von IM3 empfohlen
+.vscode
+.git
+.DS_Store
