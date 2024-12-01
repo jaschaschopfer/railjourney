@@ -1,21 +1,24 @@
 <?php
 
-echo "hi"; // Dies wird nach der Funktionsausgabe angezeigt
+echo "hi and "; // Dies wird nach der Funktionsausgabe angezeigt
+echo "test"; // Dies wird nach der Funktionsausgabe angezeigt
 
 // Funktionsaufruf mit dynamischen Parametern
 $from = 'Worb Dorf';
 $to = 'Bern';
 $date = '2024-11-22';
 $time = '15:40';
+$limit = 1;
+
 fetchStations('Worb Dorf');
-fetchConnections($from, $to, $date, $time);
+fetchConnections($from, $to, $date, $time, $limit);
 
 function fetchStations($query) {
     // URL-kodieren des Parameters, um sicherzustellen, dass Leerzeichen und andere Sonderzeichen korrekt behandelt werden
     $encodedQuery = urlencode($query);
 
     // Dynamische URL mit dem übergebenen Parameter
-    $url = "http://transport.opendata.ch/v1/locations?query=$query";
+    $url = "http://transport.opendata.ch/v1/locations?query=$encodedQuery";
 
     // Initialize a cURL session
     $ch = curl_init($url);
@@ -54,9 +57,15 @@ function fetchStations($query) {
 
 }
 
-function fetchConnections($from, $to, $date, $time) {
+function fetchConnections($from, $to, $date, $time, $limit) {
+    $encodedFrom = urlencode($from);
+    $encodedTo = urlencode($to);
+    $encodedDate = urlencode($date);
+    $encodedTime = urlencode($time);
+    $encodedLimit = urlencode($limit);
+
     // Dynamische URL mit den übergebenen Parametern
-    $url = "http://transport.opendata.ch/v1/connections?from=$from&to=$to&date=$date&time=$time";
+    $url = "http://transport.opendata.ch/v1/connections?from=$encodedFrom&to=$encodedTo&date=$encodedDate&time=$encodedTime&limit=$encodedLimit";
 
     // Initialize a cURL session
     $ch = curl_init($url);
