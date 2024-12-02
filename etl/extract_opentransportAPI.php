@@ -1,9 +1,9 @@
 <?php
 
-echo "hi and "; // Dies wird nach der Funktionsausgabe angezeigt
-echo "test"; // Dies wird nach der Funktionsausgabe angezeigt
+echo "hi and "; // This will be displayed after the function output
+echo "test4"; // This will be displayed after the function output
 
-// Funktionsaufruf mit dynamischen Parametern
+// Function call with dynamic parameters
 $from = 'Worb Dorf';
 $to = 'Bern';
 $date = '2024-11-22';
@@ -14,10 +14,10 @@ fetchStations('Worb Dorf');
 fetchConnections($from, $to, $date, $time, $limit);
 
 function fetchStations($query) {
-    // URL-kodieren des Parameters, um sicherzustellen, dass Leerzeichen und andere Sonderzeichen korrekt behandelt werden
+    // URL-encode the parameter to ensure that spaces and other special characters are handled correctly
     $encodedQuery = urlencode($query);
 
-    // Dynamische URL mit dem übergebenen Parameter
+    // Dynamic URL with the passed parameter
     $url = "http://transport.opendata.ch/v1/locations?query=$encodedQuery";
 
     // Initialize a cURL session
@@ -64,7 +64,7 @@ function fetchConnections($from, $to, $date, $time, $limit) {
     $encodedTime = urlencode($time);
     $encodedLimit = urlencode($limit);
 
-    // Dynamische URL mit den übergebenen Parametern
+    // Dynamic URL with the passed parameters
     $url = "http://transport.opendata.ch/v1/connections?from=$encodedFrom&to=$encodedTo&date=$encodedDate&time=$encodedTime&limit=$encodedLimit";
 
     // Initialize a cURL session

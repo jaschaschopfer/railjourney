@@ -3,10 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>FlexJourney - Main Page</title>
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-    <p>Hallo welt
-    </p>
+    <div class="content-container">
+        <!-- Tab Content -->
+        <div id="newJourney" class="tab-content active">
+            <h2>Where are we going?</h2>
+            <label for="from">From:</label>
+            <input type="text" id="from" value="My location" placeholder="Enter starting point">
+
+            <label for="to">To:</label>
+            <input type="text" id="to" placeholder="Enter destination">
+
+            <button id="searchButton">Search</button>
+            
+            <div id="results">
+                <!-- Display search results here -->
+            </div>
+        </div>
+
+        <div id="myJourneys" class="tab-content">
+            <h2>My Saved Journeys</h2>
+            <div id="savedJourneys">
+                <!-- Saved journeys will be listed here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs at the bottom -->
+    <div class="tabs-container">
+        <button class="tab-button active" data-tab="newJourney">New Journey</button>
+        <button class="tab-button" data-tab="myJourneys">My Journeys</button>
+    </div>
+
+    <script src="/js/scripts.js"></script>
 </body>
 </html>
