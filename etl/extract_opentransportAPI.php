@@ -1,18 +1,5 @@
 <?php
 
-echo "hi and "; // This will be displayed after the function output
-echo "test4"; // This will be displayed after the function output
-
-// Function call with dynamic parameters
-$from = 'Worb Dorf';
-$to = 'Bern';
-$date = '2024-11-22';
-$time = '15:40';
-$limit = 1;
-
-fetchStations('Worb Dorf');
-fetchConnections($from, $to, $date, $time, $limit);
-
 function fetchStations($query) {
     // URL-encode the parameter to ensure that spaces and other special characters are handled correctly
     $encodedQuery = urlencode($query);
@@ -43,14 +30,8 @@ function fetchStations($query) {
 
     // Check if the response is empty
     if (!$response) {
-        echo "No response from API."; // Display a message if no response
-        return;
+        return ['error' => 'No response from API'];
     }
-
-    // Print the response on the screen (optional)
-    echo "<pre>";
-    print_r(json_decode($response, true)); // Nicely formatted JSON output
-    echo "</pre>";
 
     // Decode the JSON response and return it
     return json_decode($response, true);
@@ -90,15 +71,9 @@ function fetchConnections($from, $to, $date, $time, $limit) {
 
     // Check if the response is empty
     if (!$response) {
-        echo "No response from API."; // Display a message if no response
-        return;
+        return ['error' => 'No response from API'];
     }
-
-    // Print the response on the screen (optional)
-    echo "<pre>";
-    print_r(json_decode($response, true)); // Nicely formatted JSON output
-    echo "</pre>";
-
+    
     // Decode the JSON response and return it
     return json_decode($response, true);
 }

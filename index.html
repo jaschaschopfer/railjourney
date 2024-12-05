@@ -11,11 +11,14 @@
         <!-- Tab Content -->
         <div id="newJourney" class="tab-content active">
             <h2>Where are we going?</h2>
+
             <label for="from">From:</label>
-            <input type="text" id="from" value="My location" placeholder="Enter starting point">
+            <input type="text" id="from" placeholder="Enter starting point" autocomplete="off">
+            <div id="fromSuggestions" class="dropdown"></div>
 
             <label for="to">To:</label>
-            <input type="text" id="to" placeholder="Enter destination">
+            <input type="text" id="to" placeholder="Enter destination" autocomplete="off">
+            <div id="toSuggestions" class="dropdown"></div>
 
             <button id="searchButton">Search</button>
             
