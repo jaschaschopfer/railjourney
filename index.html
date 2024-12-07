@@ -8,25 +8,39 @@
 </head>
 <body>
     <div class="content-container">
-        <!-- Tab Content -->
+        <!-- Tab Content new Journey-->
         <div id="newJourney" class="tab-content active">
             <h2>Where are we going?</h2>
 
-            <label for="from">From:</label>
-            <input type="text" id="from" placeholder="Enter starting point" autocomplete="off">
-            <div id="fromSuggestions" class="dropdown"></div>
+            <div class="search-container">
+                <label for="from">From:</label>
+                <input type="text" id="from" placeholder="Enter starting point" autocomplete="off">
+                <div id="fromSuggestions" class="dropdown"></div>
 
-            <label for="to">To:</label>
-            <input type="text" id="to" placeholder="Enter destination" autocomplete="off">
-            <div id="toSuggestions" class="dropdown"></div>
+                <label for="to">To:</label>
+                <input type="text" id="to" placeholder="Enter destination" autocomplete="off">
+                <div id="toSuggestions" class="dropdown"></div>
 
-            <button id="searchButton">Search</button>
+                <label for="date">Date:</label>
+                <input type="date" id="date" value="" />
+
+                <label for="time">Time:</label>
+                <input type="time" id="time" value="" />
+
+
+                <button id="searchButton">Search</button>
+            </div>
             
             <div id="results">
                 <!-- Display search results here -->
             </div>
+            <div id="connectionDetails" style="display: none;">
+                <!-- Connection details will be rendered here -->
+            </div>
+            
         </div>
 
+        <!-- Tab Content my Journeys-->
         <div id="myJourneys" class="tab-content">
             <h2>My Saved Journeys</h2>
             <div id="savedJourneys">

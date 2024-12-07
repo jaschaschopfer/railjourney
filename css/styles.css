@@ -88,6 +88,46 @@ input[type="text"] {
     background-color: #f0f0f0;
 }
 
+#results {
+    display: none; /* Hide by default */
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.connection {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.connection h3 {
+    margin-top: 0;
+}
+
+#connectionDetails {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    display: none; /* Hidden by default */
+}
+
+.section {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.section h4 {
+    margin-top: 0;
+}
 
 button {
     padding: 10px 15px;
