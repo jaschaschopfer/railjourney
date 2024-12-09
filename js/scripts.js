@@ -309,6 +309,18 @@ function calculateWalkDuration(section) {
     return 'Unknown duration'; // Fallback for non-walk sections
 }
 
+function calculateTransferDuration(arrival, departure) {
+    if (!arrival || !departure) {
+        return 'Unknown';
+    }
+    const arrivalTime = new Date(arrival.arrivalTimestamp * 1000);
+    const departureTime = new Date(departure.departureTimestamp * 1000);
+
+    const transferMinutes = Math.round((departureTime - arrivalTime) / 60000); // Difference in minutes
+    return `${transferMinutes} min`;
+}
+
+
 
 
 
@@ -332,73 +344,157 @@ function showConnectionDetails(connection) {
     document.querySelector('#results').style.display = 'none';
 
     // Add a "Back" button
+    addBackButton(connectionDetailsContainer);
+
+    // Add overview
+    addOverview(connectionDetailsContainer, connection);
+
+    // Add journey details, including walks and transfer-walks
+    addJourneySections(connectionDetailsContainer, connection);
+
+    // Add end location if the last section is a walk
+    addEndLocationTile(connectionDetailsContainer, connection);
+
+    // Show the connection details container
+    connectionDetailsContainer.style.display = 'block';
+}
+
+// Add a "Back" button to navigate back
+function addBackButton(container) {
     const backButton = document.createElement('button');
     backButton.textContent = 'Back';
     backButton.addEventListener('click', showSearchScreen); // Attach event listener to navigate back
-    connectionDetailsContainer.appendChild(backButton);
+    container.appendChild(backButton);
+}
 
-    // Overview
+// Add an overview at the top
+function addOverview(container, connection) {
     const overview = document.createElement('div');
+    overview.classList.add('overview');
     overview.innerHTML = `
         <p>${connection.from.station.name} → ${connection.to.station.name}</p>
         <p>Date: ${formatDateForDisplay(connection.from.departure.split('T')[0])}</p>
         <p>Duration: ${formatDuration(connection.duration)}</p>
         <p>${formatTime(connection.from.departure)} → ${formatTime(connection.to.arrival)}</p>
     `;
-    connectionDetailsContainer.appendChild(overview);
+    container.appendChild(overview);
+}
 
-    // Buttons
-    const buttons = document.createElement('div');
-    buttons.innerHTML = `
-        <button id="addJourney">Add Journey</button>
-        <button id="removeJourney" style="display: none;">Remove Journey</button>
-        <button id="shareJourney" disabled>Share Journey</button>
-    `;
-    connectionDetailsContainer.appendChild(buttons);
+// Add journey sections, including walks and transfer-walks
+function addJourneySections(container, connection) {
+    const firstSection = connection.sections[0];
 
-    // Sections for journey details
+    // Add the start location tile if the first section is a walk
+    if (firstSection?.walk) {
+        addStartLocationTile(container, connection.from.station.name);
+    }
+
+    let previousJourney = null; // Track the previous journey to handle transfer-walks
+
     connection.sections.forEach((section, index) => {
-        const sectionContainer = document.createElement('div');
-        sectionContainer.classList.add('section');
-
         if (section.walk) {
-            const walkDuration = calculateWalkDuration(section); // Use the new function
-            sectionContainer.innerHTML = `
-                <h4>Walk</h4>
-                <p>Duration: ${walkDuration}</p>
-                <p>From: ${section.departure.station.name}</p>
-                <p>To: ${section.arrival.station.name}</p>
-            `;
-        }
-         else if (section.journey) {
-            // Journey Section
-            const departure = section.departure;
-            const arrival = section.arrival;
-            const journey = section.journey;
+            // Add a walk section
+            addWalkSection(container, section);
+            previousJourney = null; // Reset previous journey since a walk already connects sections
+        } else if (section.journey) {
+            // Add a transfer-walk section only if there is no preceding walk
+            if (previousJourney && !connection.sections[index - 1]?.walk) {
+                addTransferWalkSection(container, previousJourney.arrival, section.departure);
+            }
 
-            sectionContainer.innerHTML = `
-                <h4>Section ${index + 1}</h4>
-                <p>${formatTime(departure.departure)}: ${departure.station.name} (Platform: ${departure.platform || 'Unknown'})</p>
-                <p>Line: ${journey.category || 'Unknown'} ${journey.number || ''}</p>
-                <p>Direction: ${journey.to || 'Unknown'}</p>
-                <p>${formatTime(arrival.arrival)}: ${arrival.station.name} (Platform: ${arrival.platform || 'Unknown'})</p>
-                <button class="adjustTime">Adjust Time</button>
-                <button class="splitJourney">Split</button>
-                <button class="addStop">Add Stop</button>
-            `;
+            // Add a journey section
+            addJourneySection(container, section, index);
+
+            // Update the previous journey
+            previousJourney = section;
         } else {
-            // Fallback for unexpected section type
-            sectionContainer.innerHTML = `
+            // Handle unknown section types
+            const unknownSection = document.createElement('div');
+            unknownSection.classList.add('section');
+            unknownSection.innerHTML = `
                 <p>Unknown section type.</p>
             `;
+            container.appendChild(unknownSection);
         }
-
-        connectionDetailsContainer.appendChild(sectionContainer);
     });
-
-    // Show the connection details container
-    connectionDetailsContainer.style.display = 'block';
 }
+
+
+// Add the start location tile
+function addStartLocationTile(container, locationName) {
+    const startLocationTile = document.createElement('div');
+    startLocationTile.classList.add('section', 'location-tile');
+    startLocationTile.innerHTML = `
+        <h4>Start Location</h4>
+        <p>${locationName}</p>
+    `;
+    container.appendChild(startLocationTile);
+}
+
+// Add a single journey section
+function addJourneySection(container, section, index) {
+    const departure = section.departure;
+    const arrival = section.arrival;
+    const journey = section.journey;
+
+    const journeySection = document.createElement('div');
+    journeySection.classList.add('section');
+    journeySection.innerHTML = `
+        <h4>Section ${index + 1}</h4>
+        <p>${formatTime(departure.departure)}: ${departure.station.name} (Platform: ${departure.platform || 'Unknown'})</p>
+        <p>Line: ${journey.category || 'Unknown'} ${journey.number || ''}</p>
+        <p>Direction: ${journey.to || 'Unknown'}</p>
+        <p>${formatTime(arrival.arrival)}: ${arrival.station.name} (Platform: ${arrival.platform || 'Unknown'})</p>
+        <button class="adjustTime">Adjust Time</button>
+        <button class="splitJourney">Split</button>
+        <button class="addStop">Add Stop</button>
+    `;
+    container.appendChild(journeySection);
+}
+
+// Add a single walk section
+function addWalkSection(container, section) {
+    const walkDuration = calculateWalkDuration(section); // Use the walk duration calculation function
+
+    const walkSection = document.createElement('div');
+    walkSection.classList.add('section');
+    walkSection.innerHTML = `
+        <h4>Walk</h4>
+        <p>Duration: ${walkDuration}</p>
+    `;
+    container.appendChild(walkSection);
+}
+
+// Add a transfer-walk section
+function addTransferWalkSection(container, previousArrival, currentDeparture) {
+    const transferWalkContainer = document.createElement('div');
+    transferWalkContainer.classList.add('section', 'transfer-walk');
+
+    const transferTime = calculateTransferDuration(previousArrival, currentDeparture);
+
+    transferWalkContainer.innerHTML = `
+        <h4>Transfer-Walk</h4>
+        <p>Duration: ${transferTime}</p>
+    `;
+    container.appendChild(transferWalkContainer);
+}
+
+// Add the end location tile if the last section is a walk
+function addEndLocationTile(container, connection) {
+    const lastSection = connection.sections[connection.sections.length - 1];
+    if (lastSection?.walk) {
+        const endLocationTile = document.createElement('div');
+        endLocationTile.classList.add('section', 'location-tile');
+        endLocationTile.innerHTML = `
+            <h4>Destination</h4>
+            <p>${connection.to.station.name}</p>
+        `;
+        container.appendChild(endLocationTile);
+    }
+}
+
+
+
 
 
 
