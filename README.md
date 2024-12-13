@@ -3,6 +3,8 @@
 Zusätzlich setzen sich die 5 Vias immer zurück, wenn ein LOI eingefügt wurde. Da die API ja ab dort eine neue Abfrage macht.
 2. Vorteil der Via Nutzung ist die korrekte Berechnung der Umsteigezeiten: Werden VIAs nicht als LOIs weitergegeben für die Neuberechnung einer Gesamtverbindung gibt es nicht das Problem, dass plötzlich eine zu kurze Umsteigezeit berechnet wird. (BEISPIEL A)
 
+Wichtig: Ein via kann in einer connection selbst drin sein oder ein Umsteigeort. Ist es in einer connection selbst drin, ist es gespeichert bei Neuanfragen (es schaut also, dass immer diese Verbindung gesucht wird über diesen via punkt), aber der via punkt ist nicht bearbeitbar.
+
 BEISPIEL A:
 Egghölzli via Bern nach Bolligen --> Die API berechnet die Zeit zum Umsteigen korrekt
 Egghölzli LOI Bern nach Bolligen --> Die API berechnet Abfahrtszeit von Bern nach Bolligen evtl. zu knapp, weil bei der manuellen Neuberechnung ab Bern nicht mehr der Ankunftsort vom T6 am Trambahnhof berechnet wird. Die Umsteigezeit fällt also komplett weg.
