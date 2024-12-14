@@ -19,7 +19,7 @@
 
                 <div id="viaContainer">
                     <label for="via1">Via:</label>
-                    <input type="text" id="via1" placeholder="Enter via location" autocomplete="off">
+                    <input type="text" id="via1" class="viainput" placeholder="Enter via location" autocomplete="off">
                     <div id="via1Suggestions" class="dropdown"></div>
                 </div>
                 
@@ -27,7 +27,13 @@
                 <input type="text" id="to" placeholder="Enter destination" autocomplete="off">
                 <div id="toSuggestions" class="dropdown"></div>
 
-                
+                <div id="timeModeSwitch" class="switch-container">
+                    <label for="timeMode">
+                        <span id="timeModeLabel">Set departure time</span>
+                        <input type="checkbox" id="timeMode">
+                        <span class="slider"></span>
+                    </label>
+                </div>
                 
                 <label for="date">Date:</label>
                 <input type="date" id="date" value="" />

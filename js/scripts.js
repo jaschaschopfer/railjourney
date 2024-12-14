@@ -23,6 +23,22 @@ document.addEventListener('DOMContentLoaded', () => {
     fromInput.addEventListener('input', event => handleStationInput(event, fromSuggestions));
     toInput.addEventListener('input', event => handleStationInput(event, toSuggestions));
 
+    const timeModeCheckbox = document.querySelector('#timeMode');
+    const timeModeLabel = document.querySelector('#timeModeLabel');
+
+    // Add event listener for the time switch
+    timeModeCheckbox.addEventListener('change', () => {
+        if (timeModeCheckbox.checked) {
+            timeModeLabel.textContent = 'Set arrival time';
+        } else {
+            timeModeLabel.textContent = 'Set departure time';
+        }
+    });
+
+    // Set the initial state to "Departure" (default)
+    timeModeCheckbox.checked = false;
+    timeModeLabel.textContent = 'Set departure time';
+
     // Set default values for date and time fields
     const dateInput = document.querySelector('#date');
     const timeInput = document.querySelector('#time');
@@ -101,7 +117,7 @@ function initializeViaFields() {
     viaField1.classList.add('via-field');
     viaField1.innerHTML = `
         <label for="via1">Via:</label>
-        <input type="text" id="via1" placeholder="Enter via location" autocomplete="off">
+        <input type="text" id="via1" class="viainput" placeholder="Enter via location" autocomplete="off">
         <div id="via1Suggestions" class="dropdown"></div>
     `;
     viaContainer.appendChild(viaField1);
@@ -150,7 +166,7 @@ function addNextViaField(index) {
     viaField.classList.add('via-field');
     viaField.innerHTML = `
         <label for="via${index}">Via:</label>
-        <input type="text" id="via${index}" placeholder="Enter via location" autocomplete="off">
+        <input type="text" id="via${index}" class="viainput" placeholder="Enter via location" autocomplete="off">
         <div id="via${index}Suggestions" class="dropdown"></div>
     `;
     viaContainer.insertBefore(viaField, document.querySelector('#resetVias'));
@@ -259,10 +275,31 @@ function searchConnections() {
     const date = document.querySelector('#date').value;
     const time = document.querySelector('#time').value;
 
+    // Collect filled "via" fields
+    const viaFields = document.querySelectorAll('.viainput'); // Select all elements with class "viainput"
+    const viaParams = [];
+    viaFields.forEach(field => {
+    const value = field.value.trim();
+    if (value) { // Ignore empty fields
+        viaParams.push(`via[]=${encodeURIComponent(value)}`);
+    }
+    });
+
+    const viaQueryString = viaParams.join('&'); // Join the "via" parameters into a query string
+    console.log('Via Query String:', viaQueryString); // Log the generated viaQueryString
+
+    // Get the state of the time switcher
+    const timeModeCheckbox = document.querySelector('#timeMode');
+    const isArrivalTime = timeModeCheckbox.checked ? 1 : 0;
+
     const resultsContainer = document.querySelector('#results');
     resultsContainer.style.display = 'none'; // Hide results while fetching
 
-    fetch(`/etl/transform_opentransportAPI.php?action=fetchConnections&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}`)
+    // Construct the API URL
+    const url = `/etl/transform_opentransportAPI.php?action=fetchConnections&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&isArrivalTime=${isArrivalTime}&${viaParams.join('&')}`;
+
+    // Fetch connections from the API
+    fetch(url)
         .then(response => response.json())
         .then(data => {
             console.log('Connections:', data);

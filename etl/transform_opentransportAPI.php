@@ -2,6 +2,13 @@
 // Include the functions from extract_opentransportAPI.php
 require_once 'extract_opentransportAPI.php';
 
+// Debug logging function
+function logDebugMessage($message) {
+    $logFile = __DIR__ . '/debug.log'; // Path to a custom debug file
+    $timestamp = date('Y-m-d H:i:s'); // Add a timestamp to each log entry
+    file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND); // Append the message
+}
+
 // Set the header to return JSON response
 header('Content-Type: application/json');
 
@@ -30,6 +37,19 @@ if ($action === 'fetchStations') {
     $date = $_GET['date'] ?? date('Y-m-d'); // Default to today
     $time = $_GET['time'] ?? date('H:i');   // Default to current time
     $limit = $_GET['limit'] ?? 5;           // Default to 5 results
+    $isArrivalTime = $_GET['isArrivalTime'] ?? 0; // Default to departure time
+
+    // Collect "via" fields (via[] is expected to be an array)
+    $vias = $_GET['via'] ?? [];
+    if (!is_array($vias)) {
+        $vias = [$vias]; // Convert to array if a single value is passed
+    }
+
+    // Limit to 5 vias as per API constraints
+    $vias = array_slice(array_filter($vias, fn($via) => !empty($via)), 0, 5);
+
+    logDebugMessage("Received vias: " . json_encode($vias));
+
 
     if (!$from || !$to) {
         http_response_code(400); // Bad Request
@@ -37,10 +57,27 @@ if ($action === 'fetchStations') {
         exit;
     }
 
-    // Call fetchConnections and return the result
-    $connections = fetchConnections($from, $to, $date, $time, $limit);
+    // Pass "via[]" parameters as part of the query string
+    $viaQuery = '';
+    foreach ($vias as $via) {
+        $viaQuery .= '&via[]=' . urlencode($via);
+    }
+
+    // Construct the API URL
+    $url = "http://transport.opendata.ch/v1/connections?from=" . urlencode($from)
+         . "&to=" . urlencode($to)
+         . "&date=" . urlencode($date)
+         . "&time=" . urlencode($time)
+         . "&isArrivalTime=" . urlencode($isArrivalTime)
+         . $viaQuery;
+
+    // logDebugMessage("Constructed URL: " . $url); // Custom debug log message
+
+    // Fetch data from the API
+    $connections = fetchConnections($url);
     echo json_encode($connections);
     exit;
+
 
 } else {
     // Invalid action

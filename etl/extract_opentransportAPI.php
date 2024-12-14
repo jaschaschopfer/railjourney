@@ -38,16 +38,7 @@ function fetchStations($query) {
 
 }
 
-function fetchConnections($from, $to, $date, $time, $limit) {
-    $encodedFrom = urlencode($from);
-    $encodedTo = urlencode($to);
-    $encodedDate = urlencode($date);
-    $encodedTime = urlencode($time);
-    $encodedLimit = urlencode($limit);
-
-    // Dynamic URL with the passed parameters
-    $url = "http://transport.opendata.ch/v1/connections?from=$encodedFrom&to=$encodedTo&date=$encodedDate&time=$encodedTime&limit=$encodedLimit";
-
+function fetchConnections($url) {
     // Initialize a cURL session
     $ch = curl_init($url);
 
@@ -73,8 +64,7 @@ function fetchConnections($from, $to, $date, $time, $limit) {
     if (!$response) {
         return ['error' => 'No response from API'];
     }
-    
+
     // Decode the JSON response and return it
     return json_decode($response, true);
 }
-?>
