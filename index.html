@@ -17,19 +17,27 @@
                 <input type="text" id="from" placeholder="Enter starting point" autocomplete="off">
                 <div id="fromSuggestions" class="dropdown"></div>
 
+                <div id="viaContainer">
+                    <label for="via1">Via:</label>
+                    <input type="text" id="via1" placeholder="Enter via location" autocomplete="off">
+                    <div id="via1Suggestions" class="dropdown"></div>
+                </div>
+                
                 <label for="to">To:</label>
                 <input type="text" id="to" placeholder="Enter destination" autocomplete="off">
                 <div id="toSuggestions" class="dropdown"></div>
 
+                
+                
                 <label for="date">Date:</label>
                 <input type="date" id="date" value="" />
-
+            
                 <label for="time">Time:</label>
                 <input type="time" id="time" value="" />
-
-
+            
                 <button id="searchButton">Search</button>
             </div>
+            
             
             <div id="results">
                 <!-- Display search results here -->

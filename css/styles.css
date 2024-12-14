@@ -88,6 +88,14 @@ input[type="text"] {
     background-color: #f0f0f0;
 }
 
+#viaContainer {
+    margin-top: 10px;
+}
+
+#viaContainer .dropdown {
+    position: relative;
+}
+
 #results {
     display: none; /* Hide by default */
     margin-top: 20px;

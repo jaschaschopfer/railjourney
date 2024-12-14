@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Initialize the via fields
+    initializeViaFields();
+
     // Add event listeners to input fields
     const fromInput = document.querySelector('#from');
     const fromSuggestions = document.querySelector('#fromSuggestions');
@@ -76,6 +79,99 @@ function formatDuration(duration) {
         return `${totalHours}h ${minutes}min`;
     }
     return 'Unknown';
+}
+
+// via field logic
+function initializeViaFields() {
+    const maxVias = 5; // Maximum number of via fields
+    const viaContainer = document.querySelector('#viaContainer'); // Container for all via fields
+
+    // Ensure #viaContainer exists
+    if (!viaContainer) {
+        console.error('Error: #viaContainer not found in the DOM.');
+        return;
+    }
+
+    // Clear the container
+    viaContainer.innerHTML = '';
+
+    // Add the first via field
+    const viaField1 = document.createElement('div');
+    viaField1.id = 'viaField1';
+    viaField1.classList.add('via-field');
+    viaField1.innerHTML = `
+        <label for="via1">Via:</label>
+        <input type="text" id="via1" placeholder="Enter via location" autocomplete="off">
+        <div id="via1Suggestions" class="dropdown"></div>
+    `;
+    viaContainer.appendChild(viaField1);
+
+    // Add input event listener for the first via field
+    const via1Input = document.querySelector('#via1');
+    const via1Suggestions = document.querySelector('#via1Suggestions');
+    if (via1Input) {
+        via1Input.addEventListener('input', (event) => {
+            handleStationInput(event, via1Suggestions);
+
+            // Show the second via field when the first one has input
+            if (via1Input.value.trim() !== '') {
+                addNextViaField(2); // Show the second field
+                ensureResetButton(); // Add the Reset Vias button dynamically
+            }
+        });
+    }
+}
+
+function ensureResetButton() {
+    const viaContainer = document.querySelector('#viaContainer');
+    const resetButton = document.querySelector('#resetVias');
+
+    // Add Reset Vias button if it doesn't exist
+    if (!resetButton) {
+        const button = document.createElement('button');
+        button.id = 'resetVias';
+        button.textContent = 'Reset Vias';
+        button.type = 'button';
+        button.addEventListener('click', resetViaFields);
+        viaContainer.appendChild(button);
+    }
+}
+
+function addNextViaField(index) {
+    const maxVias = 5; // Maximum number of via fields
+    if (index > maxVias) return; // Stop if maxVias is reached
+
+    const viaContainer = document.querySelector('#viaContainer');
+    const existingField = document.querySelector(`#viaField${index}`);
+    if (!viaContainer || existingField) return; // Skip if already added
+
+    const viaField = document.createElement('div');
+    viaField.id = `viaField${index}`;
+    viaField.classList.add('via-field');
+    viaField.innerHTML = `
+        <label for="via${index}">Via:</label>
+        <input type="text" id="via${index}" placeholder="Enter via location" autocomplete="off">
+        <div id="via${index}Suggestions" class="dropdown"></div>
+    `;
+    viaContainer.insertBefore(viaField, document.querySelector('#resetVias'));
+
+    // Add input event listener for the new via field
+    const viaInput = document.querySelector(`#via${index}`);
+    const viaSuggestions = document.querySelector(`#via${index}Suggestions`);
+    if (viaInput) {
+        viaInput.addEventListener('input', (event) => {
+            handleStationInput(event, viaSuggestions);
+
+            // Show the next via field when this one has input
+            if (viaInput.value.trim() !== '') {
+                addNextViaField(index + 1);
+            }
+        });
+    }
+}
+
+function resetViaFields() {
+    initializeViaFields(); // Reinitialize via fields to show only the first one
 }
 
 
