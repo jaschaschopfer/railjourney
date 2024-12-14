@@ -48,15 +48,6 @@ if ($action === 'fetchStations') {
     // Limit to 5 vias as per API constraints
     $vias = array_slice(array_filter($vias, fn($via) => !empty($via)), 0, 5);
 
-    logDebugMessage("Received vias: " . json_encode($vias));
-
-
-    if (!$from || !$to) {
-        http_response_code(400); // Bad Request
-        echo json_encode(['error' => 'Missing required parameters: from and to']);
-        exit;
-    }
-
     // Pass "via[]" parameters as part of the query string
     $viaQuery = '';
     foreach ($vias as $via) {
@@ -71,14 +62,10 @@ if ($action === 'fetchStations') {
          . "&isArrivalTime=" . urlencode($isArrivalTime)
          . $viaQuery;
 
-    // logDebugMessage("Constructed URL: " . $url); // Custom debug log message
-
     // Fetch data from the API
     $connections = fetchConnections($url);
     echo json_encode($connections);
     exit;
-
-
 } else {
     // Invalid action
     http_response_code(400); // Bad Request

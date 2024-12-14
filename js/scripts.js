@@ -266,17 +266,16 @@ function searchConnections() {
     const time = document.querySelector('#time').value;
 
     // Collect filled "via" fields
-    const viaFields = document.querySelectorAll('.viainput'); // Select all elements with class "viainput"
+    const viaFields = document.querySelectorAll('.viainput');
     const viaParams = [];
     viaFields.forEach(field => {
-    const value = field.value.trim();
-    if (value) { // Ignore empty fields
-        viaParams.push(`via[]=${encodeURIComponent(value)}`);
-    }
+        const value = field.value.trim();
+        if (value) { // Ignore empty fields
+            viaParams.push(`via[]=${encodeURIComponent(value)}`);
+        }
     });
 
     const viaQueryString = viaParams.join('&'); // Join the "via" parameters into a query string
-    console.log('Via Query String:', viaQueryString); // Log the generated viaQueryString
 
     // Get the state of the time switcher
     const timeModeCheckbox = document.querySelector('#timeMode');
@@ -286,7 +285,7 @@ function searchConnections() {
     resultsContainer.style.display = 'none'; // Hide results while fetching
 
     // Construct the API URL
-    const url = `/etl/transform_opentransportAPI.php?action=fetchConnections&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&isArrivalTime=${isArrivalTime}&${viaParams.join('&')}`;
+    const url = `/etl/transform_opentransportAPI.php?action=fetchConnections&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&isArrivalTime=${isArrivalTime}&${viaQueryString}`;
 
     // Fetch connections from the API
     fetch(url)
@@ -303,6 +302,7 @@ function searchConnections() {
             resultsContainer.style.display = 'none'; // Hide results on error
         });
 }
+
 
 function displayConnections(data) {
     const resultsContainer = document.querySelector('#results');
