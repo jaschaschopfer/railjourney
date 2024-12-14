@@ -26,18 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const timeModeCheckbox = document.querySelector('#timeMode');
     const timeModeLabel = document.querySelector('#timeModeLabel');
 
-    // Add event listener for the time switch
-    timeModeCheckbox.addEventListener('change', () => {
-        if (timeModeCheckbox.checked) {
-            timeModeLabel.textContent = 'Set arrival time';
-        } else {
-            timeModeLabel.textContent = 'Set departure time';
-        }
-    });
-
     // Set the initial state to "Departure" (default)
-    timeModeCheckbox.checked = false;
-    timeModeLabel.textContent = 'Set departure time';
+    timeModeLabel.textContent = 'Set arrival time';
 
     // Set default values for date and time fields
     const dateInput = document.querySelector('#date');
@@ -578,12 +568,10 @@ function addJourneySection(container, section, index) {
         <p>Line: ${journey.category || 'Unknown'} ${journey.number || ''}</p>
         <p>Direction: ${journey.to || 'Unknown'}</p>
         <p>${formatTime(arrival.arrival)}: ${arrival.station.name} (Platform: ${arrival.platform || 'Unknown'})</p>
-        <button class="adjustTime">Adjust Time</button>
-        <button class="splitJourney">Split</button>
-        <button class="addStop">Add Stop</button>
     `;
     container.appendChild(journeySection);
 }
+
 
 // Add a single walk section
 function addWalkSection(container, section) {
