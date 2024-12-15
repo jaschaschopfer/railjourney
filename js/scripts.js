@@ -317,15 +317,15 @@ function displayConnections(data) {
             connectionContainer.classList.add('connection');
 
             // Analyze the sections to extract walk and journey details
-            const { walkBefore, walkAfter, firstJourneySection } = analyzeSections(connection.sections);
+            const { walkBefore, walkAfter, firstJourneySection, lastJourneySection } = analyzeSections(connection.sections);
 
             // Extract details from the first journey section
             const journeyDirection = firstJourneySection?.journey?.to || 'Unknown'; // Get the direction from the first valid journey
             const firstLine = `${firstJourneySection?.journey?.category || 'Unknown'} ${firstJourneySection?.journey?.number || ''}`.trim(); // Combine category and number
 
-            // Departure and arrival times from the first journey section
+            // Departure and arrival times
             const departureTime = firstJourneySection?.departure?.departure || 'Unknown';
-            const arrivalTime = firstJourneySection?.arrival?.arrival || 'Unknown';
+            const arrivalTime = lastJourneySection?.arrival?.arrival || 'Unknown';
 
             // Platform from the first journey section
             const platform = firstJourneySection?.departure?.platform || 'Unknown';
@@ -376,34 +376,44 @@ function displayConnections(data) {
 
 
 
+
 // helper functions with walks (duration, check if walks exist at departure/arrival location)
 function analyzeSections(sections) {
     let walkBefore = null;
     let walkAfter = null;
     let firstJourneySection = null;
+    let lastJourneySection = null;
 
     let foundJourney = false;
 
-    sections.forEach((section) => {
+    sections.forEach((section, index) => {
         if (section.walk && !foundJourney) {
             // This walk is before the first journey
             walkBefore = calculateWalkDuration(section);
-        } else if (section.journey && !foundJourney) {
+        } else if (section.journey) {
             // First journey section
-            firstJourneySection = section;
-            foundJourney = true;
+            if (!foundJourney) {
+                firstJourneySection = section;
+                foundJourney = true;
+            }
+            // Update the last journey section every time a journey is encountered
+            lastJourneySection = section;
         } else if (section.walk && foundJourney) {
-            // This walk is after the last journey
-            walkAfter = calculateWalkDuration(section);
+            // Only set walkAfter if it's the last section
+            if (index === sections.length - 1) {
+                walkAfter = calculateWalkDuration(section);
+            }
         }
     });
 
     return {
         walkBefore,
         walkAfter,
-        firstJourneySection
+        firstJourneySection,
+        lastJourneySection,
     };
 }
+
 
 
 function calculateWalkDuration(section) {
