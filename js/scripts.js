@@ -316,7 +316,7 @@ function displayConnections(data) {
             const connectionContainer = document.createElement('div');
             connectionContainer.classList.add('connection');
 
-            // Analyze the sections to extract walk and journey details
+            // Analyze the sections to extract walk and journey details (get data for missing walkdurations and data for departure and arrival time of first and last train)
             const { walkBefore, walkAfter, firstJourneySection, lastJourneySection } = analyzeSections(connection.sections);
 
             // Extract details from the first journey section
@@ -363,7 +363,7 @@ function displayConnections(data) {
 
             // Add click listener to show connection details
             connectionContainer.addEventListener('click', () => {
-                showConnectionDetails(connection); // Render details when clicked
+                showConnectionDetails(connection); // Render details when clicked, giving the whole connection object
             });
 
             resultsContainer.appendChild(connectionContainer);
@@ -413,8 +413,6 @@ function analyzeSections(sections) {
         lastJourneySection,
     };
 }
-
-
 
 function calculateWalkDuration(section) {
     if (section.walk) {
