@@ -474,8 +474,18 @@ function showConnectionDetails(connection) {
     searchContainer.style.display = 'none';
     document.querySelector('#results').style.display = 'none';
 
-    // Add a "Back" button
-    addBackButton(connectionDetailsContainer);
+    // Create a container for buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.justifyContent = 'space-between';
+    buttonContainer.style.marginBottom = '20px';
+
+    // Add buttons
+    addBackButton(buttonContainer);
+    addSaveButton(buttonContainer);
+
+    // Append the button container
+    connectionDetailsContainer.appendChild(buttonContainer);
 
     // Add overview
     addOverview(connectionDetailsContainer, connection);
@@ -496,6 +506,20 @@ function addBackButton(container) {
     backButton.textContent = 'Back';
     backButton.addEventListener('click', showSearchScreen); // Attach event listener to navigate back
     container.appendChild(backButton);
+}
+
+function addSaveButton(container) {
+    const saveButton = document.createElement('button');
+    saveButton.textContent = 'Save Journey';
+    saveButton.addEventListener('click', saveConnection); // Add the click event listener for functionality
+    container.appendChild(saveButton);
+}
+
+// Functionality for "Save Connection"
+function saveConnection() {
+    console.log('Save Connection clicked.');
+    // Add your logic to save the connection (e.g., save to localStorage or send to the server).
+    alert('Connection has been saved successfully!');
 }
 
 // Add an overview at the top
