@@ -709,3 +709,5 @@ function saveConnection(chosenConnection, journeyConnections) {
     journeyConnections.legs.push(chosenConnection);
 }
 
+
+// LOL GITHUB SUCKS
