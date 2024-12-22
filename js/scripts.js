@@ -38,6 +38,12 @@ function handleAddVia(event) {
     const viasContainer = inbetweenStopsContainer.querySelector('.vias-container');
     if (!viasContainer) return; // Safety check
 
+    const existingVias = viasContainer.querySelectorAll('.via');
+    if (existingVias.length >= 5) {
+        alert("You can only add up to 5 vias per section."); // Notify the user
+        return; // Prevent adding more vias
+    }
+
     // Create a new via element
     const viaElement = document.createElement('div');
     viaElement.classList.add('via');
@@ -441,6 +447,8 @@ console.log("Previous Connection 'to':", previousConnection?.to);
 
         // Step 7: Save the best connection for this leg
         saveConnection(bestConnection, journeyConnections);
+
+        console.log("journey connections:", journeyConnections ); // Debug log
     } catch (error) {
         console.error("Error planning the next connection:", error);
         throw error; // Re-throw the error for higher-level handling
@@ -652,14 +660,19 @@ async function fetchConnections(queryParams) {
     try {
         const baseUrl = '/etl/transform_opentransportAPI.php?action=fetchConnections';
 
-        // Send queryParams directly to the backend as JSON
-        const response = await fetch(baseUrl, {
-            method: 'POST', // Use POST for sending complex data
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(queryParams)
-        });
+        // Construct query string from queryParams
+        const viaQueryString = queryParams.via
+            .map(via => `via[]=${encodeURIComponent(via)}`)
+            .join('&');
+
+        const queryString = `from=${encodeURIComponent(queryParams.from)}&to=${encodeURIComponent(queryParams.to)}&departureTime=${encodeURIComponent(queryParams.departureTime)}${viaQueryString ? `&${viaQueryString}` : ''}`;
+
+        const url = `${baseUrl}&${queryString}`;
+
+        console.log("Constructed URL:", url); // Debug log for the URL
+
+        // Fetch the connections from the API
+        const response = await fetch(url);
 
         // Check if the response is OK
         if (!response.ok) {
@@ -678,6 +691,7 @@ async function fetchConnections(queryParams) {
         throw error; // Re-throw the error to handle it upstream
     }
 }
+
 
 
 function filterConnectionsByEarliestArrival(connections) {
@@ -708,6 +722,3 @@ function saveConnection(chosenConnection, journeyConnections) {
     // Append the chosen connection to the journeyConnections.legs array
     journeyConnections.legs.push(chosenConnection);
 }
-
-
-// LOL GITHUB SUCKS

@@ -31,18 +31,11 @@ if ($action === 'fetchStations') {
     exit;
 
 } elseif ($action === 'fetchConnections') {
-    // Fetch raw POST data
-    $input = json_decode(file_get_contents('php://input'), true);
-
-    error_log("Received input: " . print_r($input, true));
-    error_log("Constructed URL: " . $url);
-
-
-    // Validate and get required parameters
-    $from = $input['from'] ?? null;
-    $to = $input['to'] ?? null;
-    $departureTime = $input['departureTime'] ?? null;
-    $vias = $input['via'] ?? [];
+    // Fetch GET data instead of POST data
+    $from = $_GET['from'] ?? null;
+    $to = $_GET['to'] ?? null;
+    $departureTime = $_GET['departureTime'] ?? null;
+    $vias = $_GET['via'] ?? [];
 
     if (!$from || !$to || !$departureTime) {
         http_response_code(400); // Bad Request
@@ -57,8 +50,10 @@ if ($action === 'fetchStations') {
 
     // Construct "via" query string
     $viaQuery = '';
-    foreach ($vias as $via) {
-        $viaQuery .= '&via[]=' . urlencode($via);
+    if (is_array($vias)) {
+        foreach ($vias as $via) {
+            $viaQuery .= '&via[]=' . urlencode($via);
+        }
     }
 
     // Construct the API URL
@@ -68,12 +63,15 @@ if ($action === 'fetchStations') {
          . "&time=" . urlencode($time)
          . $viaQuery;
 
+    // Log the constructed URL for debugging
+    logDebugMessage("Constructed URL: " . $url);
+
     // Fetch data from the API
     $connections = fetchConnections($url);
     echo json_encode($connections);
     exit;
-
-} else {
+}
+ else {
     // Invalid action
     http_response_code(400); // Bad Request
     echo json_encode(['error' => 'Invalid action parameter']);
