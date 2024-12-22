@@ -422,13 +422,13 @@ console.log("Previous Connection 'to':", previousConnection?.to);
         }
 
         // Step 1: Get the previous connection's arrival time
-        const previousArrivalTime = previousConnection.to.arrivalTimestamp;
-        if (!previousArrivalTime) {
+        const previousArrivalTimeISO = previousConnection.to.arrivalTimestamp;
+        if (!previousArrivalTimeISO) {
             throw new Error("Arrival time is missing in the previous connection.");
         }
 
         // Step 2: Calculate the next departure time
-        const departureTime = calculateNextDepartureTime(previousArrivalTime, stayDuration);
+        const departureTime = calculateNextDepartureTime(previousArrivalTimeISO, stayDuration);
         console.log("Next Departure Time:", departureTime); // Debug log
 
         // Step 3: Determine the destination for this leg
@@ -625,17 +625,17 @@ async function planFirstConnection(journeyPlan, journeyConnections) {
     }
 }
 
-function calculateNextDepartureTime(previousArrival, stayDuration) {
-    console.log("Previous Arrival (UNIX):", previousArrival); // Debug log
+function calculateNextDepartureTime(previousArrivalISO, stayDuration) {
+    console.log("Previous Arrival (UNIX):", previousArrivalISO); // Debug log
     console.log("Stay Duration:", stayDuration); // Debug log
 
-    // Convert previousArrival (UNIX timestamp in seconds) to milliseconds
-    const arrivalTime = new Date(previousArrival * 1000);
+    // Convert previousArrival from seconds to milliseconds ((BECAUSE OF UNIX FORMAT)) and create a Date object
+    const previousArrivalTime = new Date(previousArrivalISO * 1000);
 
-    console.log("Previous Arrival Time (Date):", arrivalTime); // Debug log
+    console.log("Previous Arrival Time (Date):", previousArrivalTime.toISOString()); // Debug log
 
     // Add stayDuration (in minutes) to the arrival time
-    const nextDepartureTime = new Date(arrivalTime.getTime() + stayDuration * 60000);
+    const nextDepartureTime = new Date(previousArrivalTime.getTime() + stayDuration * 60000);
 
     console.log("Next Departure Time:", nextDepartureTime.toISOString()); // Debug log
 

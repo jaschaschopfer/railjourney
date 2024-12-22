@@ -1,12 +1,6 @@
 <?php
 
-function fetchStations($query) {
-    // URL-encode the parameter to ensure that spaces and other special characters are handled correctly
-    $encodedQuery = urlencode($query);
-
-    // Dynamic URL with the passed parameter
-    $url = "http://transport.opendata.ch/v1/locations?query=$encodedQuery";
-
+function fetchStations($url) {
     // Initialize a cURL session
     $ch = curl_init($url);
 

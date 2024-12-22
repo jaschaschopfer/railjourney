@@ -25,13 +25,16 @@ if ($action === 'fetchStations') {
         exit;
     }
 
-    // Call fetchStations and return the result
-    $stations = fetchStations($query);
+    // Construct the API URL for stations
+    $url = "http://transport.opendata.ch/v1/locations?query=" . urlencode($query);
+
+    // Call fetchStations with the constructed URL
+    $stations = fetchStations($url);
     echo json_encode($stations);
     exit;
 
 } elseif ($action === 'fetchConnections') {
-    // Fetch GET data instead of POST data
+    // Fetch GET data
     $from = $_GET['from'] ?? null;
     $to = $_GET['to'] ?? null;
     $departureTime = $_GET['departureTime'] ?? null;
@@ -56,8 +59,9 @@ if ($action === 'fetchStations') {
         }
     }
 
-    // Construct the API URL
-    $url = "http://transport.opendata.ch/v1/connections?from=" . urlencode($from)
+    // Construct the API URL for connections
+    $url = "http://transport.opendata.ch/v1/connections?"
+         . "from=" . urlencode($from)
          . "&to=" . urlencode($to)
          . "&date=" . urlencode($date)
          . "&time=" . urlencode($time)
@@ -71,10 +75,9 @@ if ($action === 'fetchStations') {
     echo json_encode($connections);
     exit;
 }
- else {
+else {
     // Invalid action
     http_response_code(400); // Bad Request
     echo json_encode(['error' => 'Invalid action parameter']);
     exit;
 }
-?>
