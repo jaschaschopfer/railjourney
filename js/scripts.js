@@ -281,9 +281,6 @@ function clearSuggestions(inputField) {
 
 // TEMPORARY FUNCTION FOR TESTING
 document.addEventListener('DOMContentLoaded', () => {
-    populateInitialFields();
-});
-document.addEventListener('DOMContentLoaded', () => {
     populateFieldsWithSimulatedUserInput();
 });
 
@@ -353,13 +350,13 @@ async function planEntireJourney() {
         // Step 1: Collect input from the user
         const journeyPlan = collectInput();
 
-        // // Step 2: Validate the input
-        // const validationResult = validateInput(journeyPlan);
-        // if (!validationResult.isValid) {
-        //     console.error("Validation failed:", validationResult.errors);
-        //     alert("Validation errors:\n" + validationResult.errors.join("\n"));
-        //     return;
-        // }
+        // Step 2: Validate the input
+        const validationResult = validateInput(journeyPlan);
+        if (!validationResult.isValid) {
+            console.error("Validation failed:", validationResult.errors);
+            alert("Validation errors:\n" + validationResult.errors.join("\n"));
+            return;
+        }
 
         // Step 3: Initialize journeyConnections to store all legs of the journey
         const journeyConnections = { legs: [] }; // Proper initialization of 'legs'
@@ -401,9 +398,11 @@ console.log("First connection:", journeyConnections.legs[0]); // Debug log
             );
         }
 
-        // Step 7: Display the results
-        // displayResults(journeyConnections);
-        console.log(journeyConnections); // Log the journey connections
+        // Step 7: Extract general journey data
+        addGeneralJourneyData(journeyConnections);
+
+        // Step 8: Display the results
+        displayResults(journeyConnections);
 
     } catch (error) {
         console.error("Error planning the journey:", error);
@@ -721,4 +720,372 @@ function saveConnection(chosenConnection, journeyConnections) {
 
     // Append the chosen connection to the journeyConnections.legs array
     journeyConnections.legs.push(chosenConnection);
+}
+
+function addGeneralJourneyData(journeyConnections) {
+    if (!journeyConnections || !Array.isArray(journeyConnections.legs) || journeyConnections.legs.length === 0) {
+        throw new Error("Invalid journeyConnections structure or no legs found.");
+    }
+
+    // Extract the first leg and last leg
+    const firstLeg = journeyConnections.legs[0];
+    const lastLeg = journeyConnections.legs[journeyConnections.legs.length - 1];
+
+    // Calculate total stay duration by summing all stop durations
+    let totalStayDuration = 0;
+    for (let i = 1; i < journeyConnections.legs.length; i++) {
+        const previousArrival = journeyConnections.legs[i - 1].to.arrivalTimestamp;
+        const currentDeparture = journeyConnections.legs[i].from.departureTimestamp;
+
+        if (previousArrival && currentDeparture) {
+            const stayDuration = (currentDeparture - previousArrival) / 60; // Convert seconds to minutes
+            totalStayDuration += stayDuration;
+        }
+    }
+
+    // Calculate total duration of the journey
+    const journeyStart = new Date(firstLeg.from.departureTimestamp * 1000); // Convert UNIX to milliseconds
+    const journeyEnd = new Date(lastLeg.to.arrivalTimestamp * 1000); // Convert UNIX to milliseconds
+    const totalJourneyDurationMinutes = (journeyEnd - journeyStart) / (1000 * 60); // Convert milliseconds to minutes
+
+    // Attach details directly to the journeyConnections object
+    journeyConnections.from = firstLeg.from.station.name;
+    journeyConnections.to = lastLeg.to.station.name;
+    journeyConnections.startingDateTime = journeyStart.toISOString();
+    journeyConnections.endingDateTime = journeyEnd.toISOString();
+    journeyConnections.totalDurationMinutes = totalJourneyDurationMinutes;
+    journeyConnections.totalStayDurationMinutes = totalStayDuration;
+
+    console.log("Updated journeyConnections with General Journey Data:", journeyConnections); // Debug log
+}
+
+
+
+
+// Functions for displaying the results
+
+function displayResults(journeyConnections) {
+    // Step 1: Select the #results-container in the DOM
+    const resultsContainer = document.querySelector("#results-container");
+
+    // Step 2: Clear any existing content in the container
+    resultsContainer.innerHTML = "";
+
+    // Step 3: Create and append the journey overview
+    const journeyOverview = createJourneyOverview(journeyConnections);
+    resultsContainer.appendChild(journeyOverview);
+
+    // Step 4: Create and append the starting point container
+    const startingPointContainer = createStartingPointContainer(journeyConnections);
+    resultsContainer.appendChild(startingPointContainer);
+
+    // Step 5: Iterate over each leg and render connections and stops
+    journeyConnections.legs.forEach((leg, index) => {
+        // Create and append the connection container for the leg
+        const connectionContainer = createConnectionContainer(leg);
+        resultsContainer.appendChild(connectionContainer);
+
+        // If there's a stop after this leg, create and append the stop container
+        if (index < journeyConnections.legs.length - 1) {
+            const stopContainer = createResultsStopContainer(index, journeyConnections);
+            resultsContainer.appendChild(stopContainer);
+        }
+    });
+
+    // Step 6: Create and append the destination container
+    const destinationContainer = createDestinationContainer(journeyConnections);
+    resultsContainer.appendChild(destinationContainer);
+}
+
+function createJourneyOverview(journeyConnections) {
+    // Step 1: Extract relevant data from journeyConnections
+    const from = journeyConnections.from;
+    const to = journeyConnections.to;
+    const totalDurationMinutes = journeyConnections.totalDurationMinutes;
+    const totalStayDurationMinutes = journeyConnections.totalStayDurationMinutes;
+    const startingDateTime = new Date(journeyConnections.startingDateTime);
+    const endingDateTime = new Date(journeyConnections.endingDateTime);
+
+    // Format total durations
+    const formattedDuration = `${Math.floor(totalDurationMinutes / 60)}h ${totalDurationMinutes % 60}m`;
+    const formattedStayDuration = `${Math.floor(totalStayDurationMinutes / 60)}h ${totalStayDurationMinutes % 60}m`;
+
+    // Format start and end times
+    const options = { day: "2-digit", month: "2-digit" }; // For date formatting
+    const formattedStartDate = startingDateTime.toLocaleDateString("de-DE", options);
+    const formattedStartTime = startingDateTime.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+    const formattedEndDate = endingDateTime.toLocaleDateString("de-DE", options);
+    const formattedEndTime = endingDateTime.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+
+    // Step 2: Create the journey overview container
+    const overviewContainer = document.createElement("div");
+    overviewContainer.classList.add("journey-overview");
+
+    // Step 3: Populate the journey overview container
+    const title = document.createElement("h2");
+    title.textContent = "Your Journey";
+
+    const route = document.createElement("p");
+    route.textContent = `${from} → ${to}`;
+
+    const duration = document.createElement("p");
+    duration.textContent = `Duration: ${formattedDuration}`;
+
+    const stayDuration = document.createElement("p");
+    stayDuration.textContent = `Total stay duration: ${formattedStayDuration}`;
+
+    const timeRange = document.createElement("p");
+    timeRange.textContent = `${formattedStartDate} ${formattedStartTime} → ${formattedEndDate} ${formattedEndTime}`;
+
+    // Step 4: Append the elements to the overview container
+    overviewContainer.appendChild(title);
+    overviewContainer.appendChild(route);
+    overviewContainer.appendChild(duration);
+    overviewContainer.appendChild(stayDuration);
+    overviewContainer.appendChild(timeRange);
+
+    // Step 5: Return the completed container
+    return overviewContainer;
+}
+
+function createStartingPointContainer(journeyConnections) {
+    // Step 1: Extract the starting point name
+    const startingPointName = journeyConnections.legs[0]?.from?.station?.name;
+
+    if (!startingPointName) {
+        console.error("Starting point name is missing.");
+        return; // Exit if data is invalid
+    }
+
+    // Step 2: Create the starting point container
+    const startingPointContainer = document.createElement("div");
+    startingPointContainer.classList.add("results-starting-point-container");
+
+    // Step 3: Create title container
+    const titleContainer = document.createElement("div");
+    titleContainer.classList.add("results-title-container");
+
+    const title = document.createElement("h3");
+    title.textContent = "Starting Point";
+    titleContainer.appendChild(title);
+
+    // Step 4: Create location container
+    const locationContainer = document.createElement("div");
+    locationContainer.classList.add("results-location-container");
+
+    const locationName = document.createElement("p");
+    locationName.textContent = startingPointName;
+    locationContainer.appendChild(locationName);
+
+    // Step 5: Append title and location to the starting point container
+    startingPointContainer.appendChild(titleContainer);
+    startingPointContainer.appendChild(locationContainer);
+
+    // Step 6: Return the completed container
+    return startingPointContainer;
+}
+
+function createConnectionContainer(leg) {
+    // Step 1: Extract connection details
+    const fromStation = leg.from?.station?.name;
+    const toStation = leg.to?.station?.name;
+    const departureTime = new Date(leg.from?.departure).toLocaleString("de-DE", {
+        hour: "2-digit",
+        minute: "2-digit",
+        day: "2-digit",
+        month: "2-digit",
+    });
+    const arrivalTime = new Date(leg.to?.arrival).toLocaleString("de-DE", {
+        hour: "2-digit",
+        minute: "2-digit",
+        day: "2-digit",
+        month: "2-digit",
+    });
+
+    const duration = formatDuration(leg.duration); // Helper function to format duration
+
+    // Step 2: Create the main connection container
+    const connectionContainer = document.createElement("div");
+    connectionContainer.classList.add("results-connection-container");
+
+    // Step 3: Create connection overview container
+    const overviewContainer = document.createElement("div");
+    overviewContainer.classList.add("results-connection-overview-container");
+
+    const title = document.createElement("h3");
+    title.textContent = `${fromStation} → ${toStation}`;
+    overviewContainer.appendChild(title);
+
+    const durationText = document.createElement("p");
+    durationText.textContent = `Duration: ${duration}`;
+    overviewContainer.appendChild(durationText);
+
+    const timeText = document.createElement("p");
+    timeText.textContent = `${departureTime} → ${arrivalTime}`;
+    overviewContainer.appendChild(timeText);
+
+    // Append the overview container to the main connection container
+    connectionContainer.appendChild(overviewContainer);
+
+    // Step 4: Add sections for this connection
+    leg.sections.forEach((section) => {
+        const sectionContainer = createSectionContainer(section);
+        connectionContainer.appendChild(sectionContainer);
+    });
+
+    // Step 5: Return the completed container
+    return connectionContainer;
+}
+
+// Helper Function: Format duration from "00d00:12:00" to "0h 12min"
+function formatDuration(durationString) {
+    const [days, hours, minutes] = durationString
+        .replace("d", ":")
+        .split(":")
+        .map((part) => parseInt(part, 10) || 0);
+
+    return `${days * 24 + hours}h ${minutes}min`;
+}
+
+function createSectionContainer(section) {
+    // Step 1: Create the container for this section
+    const sectionContainer = document.createElement("div");
+
+    // Check if this is a ride section or a walk section
+    if (section.journey) {
+        // This is a ride section
+        sectionContainer.classList.add("results-section-container");
+
+        // Extract journey details
+        const departureStation = section.departure?.station?.name;
+        const departureTime = new Date(section.departure?.departure).toLocaleTimeString("de-DE", {
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+        const departurePlatform = section.departure?.platform
+            ? `Platform ${section.departure.platform}`
+            : "";
+
+        const arrivalStation = section.arrival?.station?.name;
+        const arrivalTime = new Date(section.arrival?.arrival).toLocaleTimeString("de-DE", {
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+        const arrivalPlatform = section.arrival?.platform
+            ? `Platform ${section.arrival.platform}`
+            : "";
+
+        const line = section.journey?.category + section.journey?.number;
+        const direction = section.journey?.to;
+
+        // Create and append section details
+        const departureInfo = document.createElement("p");
+        departureInfo.textContent = `${departureTime}: ${departureStation} (${departurePlatform})`;
+        sectionContainer.appendChild(departureInfo);
+
+        const lineInfo = document.createElement("p");
+        lineInfo.textContent = `Line: ${line} | Direction: ${direction}`;
+        sectionContainer.appendChild(lineInfo);
+
+        const arrivalInfo = document.createElement("p");
+        arrivalInfo.textContent = `${arrivalTime}: ${arrivalStation} (${arrivalPlatform})`;
+        sectionContainer.appendChild(arrivalInfo);
+    } else if (section.walk) {
+        // This is a walk section
+        sectionContainer.classList.add("results-connection-walksection-container");
+
+        const walkDuration = Math.round(section.walk.duration / 60); // Convert seconds to minutes
+
+        const walkInfo = document.createElement("p");
+        walkInfo.textContent = `Walk`;
+        sectionContainer.appendChild(walkInfo);
+
+        const walkDurationInfo = document.createElement("p");
+        walkDurationInfo.textContent = `Duration: ${walkDuration}min`;
+        sectionContainer.appendChild(walkDurationInfo);
+    }
+
+    // Step 2: Return the completed section container
+    return sectionContainer;
+}
+
+function createResultsStopContainer(stopIndex, journeyConnections) {
+    // Step 1: Get the stop details from the journeyConnections object
+    const stopLeg = journeyConnections.legs[stopIndex];
+    const nextLeg = journeyConnections.legs[stopIndex + 1];
+    const stopName = stopLeg?.to?.station?.name || "";
+
+    // Step 2: Calculate the stay duration dynamically
+    let stayDurationMinutes = 0;
+    if (stopLeg?.to?.arrivalTimestamp && nextLeg?.from?.departureTimestamp) {
+        stayDurationMinutes = Math.max(
+            0,
+            (nextLeg.from.departureTimestamp - stopLeg.to.arrivalTimestamp) / 60
+        );
+    }
+
+    const hours = Math.floor(stayDurationMinutes / 60);
+    const minutes = stayDurationMinutes % 60;
+
+    // Step 3: Create the container for the stop
+    const stopContainer = document.createElement("div");
+    stopContainer.classList.add("results-stop-container");
+
+    // Step 4: Add the title for the stop
+    const titleContainer = document.createElement("div");
+    titleContainer.classList.add("results-title-container");
+    const title = document.createElement("h3");
+    title.textContent = `Stop ${stopIndex + 1}`;
+    titleContainer.appendChild(title);
+
+    // Step 5: Add the stop details
+    const locationContainer = document.createElement("div");
+    locationContainer.classList.add("results-location-container");
+    const stopNameElement = document.createElement("p");
+    stopNameElement.textContent = stopName;
+
+    const stayDurationInfo = document.createElement("p");
+    stayDurationInfo.textContent = `Stay for: ${hours}h ${minutes}min`;
+
+    locationContainer.appendChild(stopNameElement);
+    locationContainer.appendChild(stayDurationInfo);
+
+    // Step 6: Append title and location containers to the stop container
+    stopContainer.appendChild(titleContainer);
+    stopContainer.appendChild(locationContainer);
+
+    // Step 7: Return the completed stop container
+    return stopContainer;
+}
+
+
+function createDestinationContainer(journeyConnections) {
+    // Step 1: Get the destination details from the journeyConnections object
+    const destination = journeyConnections.to || "";
+    
+    // Step 2: Create the destination container
+    const destinationContainer = document.createElement("div");
+    destinationContainer.classList.add("results-destination-container");
+
+    // Step 3: Add the title for the destination
+    const titleContainer = document.createElement("div");
+    titleContainer.classList.add("results-title-container");
+    const title = document.createElement("h3");
+    title.textContent = "Destination";
+    titleContainer.appendChild(title);
+
+    // Step 4: Add the destination details
+    const locationContainer = document.createElement("div");
+    locationContainer.classList.add("results-location-container");
+    const destinationName = document.createElement("p");
+    destinationName.textContent = destination;
+
+    locationContainer.appendChild(destinationName);
+
+    // Step 5: Append title and location containers to the destination container
+    destinationContainer.appendChild(titleContainer);
+    destinationContainer.appendChild(locationContainer);
+
+    // Step 6: Return the completed destination container
+    return destinationContainer;
 }
