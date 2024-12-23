@@ -369,34 +369,39 @@ console.log("First connection:", journeyConnections.legs[0]); // Debug log
         for (let i = 1; i < journeyPlan.stops.length; i++) {
             const previousConnection = journeyConnections.legs[journeyConnections.legs.length - 1];
             console.log("Previous Connection:", previousConnection); // Debug log
-            const currentStop = journeyPlan.stops[i];
+
+            const currentStop = journeyPlan.stops[i - 1]; // Current stop is the one we've just reached
+            const nextStop = journeyPlan.stops[i];       // Next stop is the one we're planning the journey to
             const stayDuration = currentStop.stayDuration;
-            const nextStopName = i + 1 < journeyPlan.stops.length ? journeyPlan.stops[i + 1].name : null;
 
             // Plan the next connection for the current stop
             await planNextConnection(
                 previousConnection,
                 stayDuration,
-                nextStopName,
-                journeyPlan.destination.name,
+                nextStop.name,                  // Plan to the next stop
+                journeyPlan.destination.name,   // Destination is still passed for context, but not used here
                 journeyConnections,
                 currentStop.vias
             );
         }
 
-        // Step 6: Handle the final leg from the last stop to the destination
+        // Step 6: Handle the final leg from the last stop to the destination (only if there were stops in the journeyPlan)
         if (journeyPlan.stops.length > 0) {
             const previousConnection = journeyConnections.legs[journeyConnections.legs.length - 1];
             const finalStop = journeyPlan.stops[journeyPlan.stops.length - 1];
+            const stayDuration = finalStop.stayDuration;
+
+            // Plan the final connection from the last stop to the destination
             await planNextConnection(
                 previousConnection,
-                finalStop.stayDuration,
+                stayDuration,
                 null, // No next stop; go directly to destination
-                journeyPlan.destination.name,
+                journeyPlan.destination.name, // Destination
                 journeyConnections,
                 [] // No vias for the final leg
             );
         }
+
 
         // Step 7: Extract general journey data
         addGeneralJourneyData(journeyConnections);
@@ -435,6 +440,8 @@ console.log("Previous Connection 'to':", previousConnection?.to);
 
         // Step 4: Prepare the query for the next leg
         const queryParams = prepareNextQuery(previousConnection.to.station.name, to, departureTime, via);
+
+        console.log("Next Query Params:", queryParams); // Debug log
 
         // Step 5: Fetch connections for this leg
         const connections = await fetchConnections(queryParams);
