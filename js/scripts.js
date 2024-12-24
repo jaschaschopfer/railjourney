@@ -5,6 +5,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const now = new Date();
         const formattedDateTime = now.toISOString().slice(0, 16); // Format: YYYY-MM-DDTHH:mm
         departureInput.value = formattedDateTime;
+
+        // Calculate the min date (9 calendar days ago)
+        const nineDaysAgo = new Date(now);
+        nineDaysAgo.setDate(nineDaysAgo.getDate() - 9);
+        nineDaysAgo.setHours(0, 0, 0, 0); // Set to 00:00 of that day
+        const formattedMinDateTime = nineDaysAgo.toISOString().slice(0, 16);
+        departureInput.min = formattedMinDateTime;
     }
 
     // Attach event listener to all "Add via" buttons
@@ -554,6 +561,18 @@ function validateInput(journeyPlan) {
 
     if (journeyPlan.startingPoint.departureTime && isNaN(Date.parse(journeyPlan.startingPoint.departureTime))) {
         errors.push("Starting point departure time is invalid.");
+    } else if (journeyPlan.startingPoint.departureTime) {
+        const departureTime = new Date(journeyPlan.startingPoint.departureTime);
+        const now = new Date();
+        const nineDaysAgo = new Date(now);
+        nineDaysAgo.setDate(nineDaysAgo.getDate() - 9);
+        nineDaysAgo.setHours(0, 0, 0, 0); // Set to midnight 9 days ago
+
+        if (departureTime < nineDaysAgo) {
+            errors.push(
+                `Starting point departure time cannot be earlier than ${nineDaysAgo.toLocaleString("de-DE")}.`
+            );
+        }
     }
 
     // Validate stops
