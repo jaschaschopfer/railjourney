@@ -916,17 +916,24 @@ function createConnectionContainer(leg) {
     // Step 1: Extract connection details
     const fromStation = leg.from?.station?.name;
     const toStation = leg.to?.station?.name;
-    const departureTime = new Date(leg.from?.departure).toLocaleString("de-DE", {
-        hour: "2-digit",
-        minute: "2-digit",
+
+    // Format departure and arrival times without commas
+    const departureDate = new Date(leg.from?.departure).toLocaleDateString("de-DE", {
         day: "2-digit",
         month: "2-digit",
     });
-    const arrivalTime = new Date(leg.to?.arrival).toLocaleString("de-DE", {
+    const departureTime = new Date(leg.from?.departure).toLocaleTimeString("de-DE", {
         hour: "2-digit",
         minute: "2-digit",
+    });
+
+    const arrivalDate = new Date(leg.to?.arrival).toLocaleDateString("de-DE", {
         day: "2-digit",
         month: "2-digit",
+    });
+    const arrivalTime = new Date(leg.to?.arrival).toLocaleTimeString("de-DE", {
+        hour: "2-digit",
+        minute: "2-digit",
     });
 
     const duration = formatDuration(leg.duration); // Helper function to format duration
@@ -948,7 +955,7 @@ function createConnectionContainer(leg) {
     overviewContainer.appendChild(durationText);
 
     const timeText = document.createElement("p");
-    timeText.textContent = `${departureTime} → ${arrivalTime}`;
+    timeText.textContent = `${departureDate} ${departureTime} → ${arrivalDate} ${arrivalTime}`;
     overviewContainer.appendChild(timeText);
 
     // Append the overview container to the main connection container
@@ -1021,8 +1028,15 @@ function createSectionContainer(section) {
         // This is a walk section
         sectionContainer.classList.add("results-connection-walksection-container");
 
-        const walkDuration = Math.round(section.walk.duration / 60); // Convert seconds to minutes
+        // Calculate walk duration if missing
+        let walkDuration = section.walk.duration;
+        if (!walkDuration && section.departure?.departureTimestamp && section.arrival?.arrivalTimestamp) {
+            walkDuration = Math.round(
+                (section.arrival.arrivalTimestamp - section.departure.departureTimestamp) / 60 // Convert seconds to minutes
+            );
+        }
 
+        // Create walk details
         const walkInfo = document.createElement("p");
         walkInfo.textContent = `Walk`;
         sectionContainer.appendChild(walkInfo);
