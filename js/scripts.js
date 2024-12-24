@@ -79,6 +79,9 @@ function handleAddStop(event) {
     const currentInbetweenStopsContainer = event.target.closest('.inbetween-stops-container');
     if (!currentInbetweenStopsContainer) return; // Safety check
 
+    // Renumber existing stops before adding a new one
+    renumberStops();
+
     // Create a new stop-container
     const stopContainer = createStopContainer();
 
@@ -88,7 +91,11 @@ function handleAddStop(event) {
     // Insert the new stop-container and the new inbetween-stops-container after the current inbetween-stops-container
     currentInbetweenStopsContainer.insertAdjacentElement('afterend', stopContainer);
     stopContainer.insertAdjacentElement('afterend', newInbetweenStopsContainer);
+
+    // Renumber stops again after adding the new stop
+    renumberStops();
 }
+
 
 // Function to create a new stop-container
 function createStopContainer() {
@@ -150,6 +157,19 @@ function createStopContainer() {
     stopContainer.appendChild(inputContainer);
 
     return stopContainer;
+}
+
+function renumberStops() {
+    // Select all stop containers
+    const stopContainers = document.querySelectorAll('.stop-container');
+
+    // Loop through each stop container and update its number
+    stopContainers.forEach((stopContainer, index) => {
+        const stopTitle = stopContainer.querySelector('.title-container h2');
+        if (stopTitle) {
+            stopTitle.textContent = `Stop ${index + 1}`; // Update the stop title with the correct number
+        }
+    });
 }
 
 // Function to create a new inbetween-stops-container

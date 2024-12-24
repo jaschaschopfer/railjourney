@@ -1,218 +1,136 @@
-/* Mobile-First Basic Structure */
-body, html {
-    margin: 0;
+/* General Styles */
+body {
+    font-family: Roboto, Arial, sans-serif;
+    margin: 10;
     padding: 0;
-    font-family: Arial, sans-serif;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    background-color: #f5f5f5;
+    color: #212121;
 }
 
-/* Container for the content */
-.content-container {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;  /* Scroll content if needed */
-}
-
-/* Style for the Tab Buttons */
-.tabs-container {
-    display: flex;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: #fff;
-    box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.tab-button {
-    flex: 1;
-    padding: 12px;
-    background-color: #f0f0f0;
-    border: none;
-    text-align: center;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.tab-button.active {
-    background-color: #4CAF50;
-    color: white;
-}
-
-.tab-button:hover {
-    background-color: #45a049;
-}
-
-/* Tabs invisible by default */
-.tab-content {
-    display: none;
-}
-
-/* Active tab turned to visible */
-.tab-content.active {
-    display: block;
-}
-
-/* Styling for the New Journey Form */
-input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    box-sizing: border-box;
-}
-
-.dropdown {
-    position: absolute;
-    background-color: white;
-    border: 1px solid #ddd;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 1000;
-    display: none; /* Hidden by default */
-}
-
-.dropdown-item {
-    padding: 10px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-}
-
-.dropdown-item:last-child {
-    border-bottom: none;
-}
-
-.dropdown-item:hover {
-    background-color: #f0f0f0;
-}
-
-#viaContainer {
-    margin-top: 10px;
-}
-
-#viaContainer .dropdown {
-    position: relative;
-}
-
-.switch-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.switch-container label {
-    display: inline-flex;
-    align-items: center;
-    cursor: pointer;
-    user-select: none;
-}
-
-.switch-container input[type="checkbox"] {
-    display: none;
-}
-
-.switch-container .slider {
-    position: relative;
-    width: 50px;
-    height: 25px;
-    background-color: #ccc;
-    border-radius: 15px;
-    margin-left: 10px;
-    transition: background-color 0.3s ease;
-}
-
-.switch-container input[type="checkbox"]:checked + .slider {
-    background-color: #4CAF50;
-}
-
-.switch-container .slider:before {
-    content: '';
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background-color: white;
-    border-radius: 50%;
-    top: 50%;
-    left: 5px;
-    transform: translateY(-50%);
-    transition: transform 0.3s ease;
-}
-
-.switch-container input[type="checkbox"]:checked + .slider:before {
-    transform: translate(25px, -50%);
-}
-
-#timeModeLabel {
-    font-size: 16px;
-    margin-right: 10px;
-}
-
-
-#results {
-    display: none; /* Hide by default */
-    margin-top: 20px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-}
-
-.connection {
-    margin-bottom: 15px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #fff;
-}
-
-.connection h3 {
-    margin-top: 0;
-}
-
-#connectionDetails {
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    display: none; /* Hidden by default */
-}
-
-.section {
-    margin-bottom: 15px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #fff;
-}
-
-.section h4 {
-    margin-top: 0;
+h2, h3 {
+    margin: 0;
+    color: #424242;
+    font-weight: 500;
 }
 
 button {
-    padding: 10px 15px;
-    background-color: #4CAF50;
-    color: white;
+    background-color: #6200ea;
+    color: #fff;
     border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 button:hover {
-    background-color: #45a049;
+    background-color: #3700b3;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* For larger screens, such as tablets and desktops, change the layout */
-@media (min-width: 600px) {
-    .tabs-container {
-        position: static;
-        background-color: transparent;
-        box-shadow: none;
-    }
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
 
-    .tab-button {
-        font-size: 18px;
-        padding: 14px;
-    }
+input:focus {
+    border-color: #6200ea;
+    outline: none;
+    box-shadow: 0 2px 4px rgba(98, 0, 234, 0.2);
+}
+
+/* Layout Containers */
+#input-blocks-container {
+    max-width: 800px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+#results-container {
+    max-width: 800px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Titles */
+.title-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/* Input Containers */
+.input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.location-input-container, .duration-input-container, .departure-arrival-time-container {
+    flex: 1;
+}
+
+/* Vias and Stops */
+.vias-container {
+    margin-bottom: 10px;
+}
+
+.via {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.stop-container {
+    background-color: #f1f8e9;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Results Styles */
+.results-connection-container {
+    margin-bottom: 20px;
+}
+
+.results-starting-point-container, .results-connection-container, .results-stop-container, .results-destination-container {
+    background-color: #e3f2fd;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.results-section-container {
+    padding: 10px;
+    border: 1px solid #cfd8dc;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.results-connection-walksection-container {
+    background-color: #fff3e0;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ffe0b2;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
