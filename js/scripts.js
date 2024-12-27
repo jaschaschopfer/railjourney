@@ -3,14 +3,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const departureInput = document.getElementById('starting-point-departure');
     if (departureInput) {
         const now = new Date();
-        const formattedDateTime = now.toISOString().slice(0, 16);
+
+        // Format the current time in MEZ (Central European Time)
+        const formatter = new Intl.DateTimeFormat('de-DE', {
+            timeZone: 'Europe/Berlin',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hourCycle: 'h23',
+        });
+
+        // Parse the formatted MEZ time into ISO format (YYYY-MM-DDTHH:mm)
+        const parts = formatter.formatToParts(now).reduce((acc, part) => {
+            acc[part.type] = part.value;
+            return acc;
+        }, {});
+        const formattedDateTime = `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
         departureInput.value = formattedDateTime;
 
-        // Calculate the min date (9 calendar days ago)
+        // Calculate the min date (9 calendar days ago in MEZ)
         const nineDaysAgo = new Date(now);
         nineDaysAgo.setDate(nineDaysAgo.getDate() - 9);
-        nineDaysAgo.setHours(0, 0, 0, 0);
-        departureInput.min = nineDaysAgo.toISOString().slice(0, 16);
+
+        const nineDaysAgoParts = formatter.formatToParts(nineDaysAgo).reduce((acc, part) => {
+            acc[part.type] = part.value;
+            return acc;
+        }, {});
+        const formattedMinDateTime = `${nineDaysAgoParts.year}-${nineDaysAgoParts.month}-${nineDaysAgoParts.day}T00:00`;
+        departureInput.min = formattedMinDateTime;
     }
 
     // Attach event listeners
@@ -318,76 +340,12 @@ function clearSuggestions(inputField) {
 
 
 
-// functions for sending the inputs and getting the results
+
+// ########################################################################################################################
+// FUNCTIONS FOR SENDING THE INPUTS AND GETTING THE RESULTS
 
 
-
-// TEMPORARY FUNCTION FOR TESTING
-document.addEventListener('DOMContentLoaded', () => {
-    populateFieldsWithSimulatedUserInput();
-});
-
-function populateFieldsWithSimulatedUserInput() {
-    // Set Starting Point
-    const startingPointInput = document.getElementById('starting-point-location');
-    if (startingPointInput) {
-        startingPointInput.value = 'Bern';
-    }
-
-    const startingPointDeparture = document.getElementById('starting-point-departure');
-    if (startingPointDeparture) {
-        const departureDate = new Date(2024, 11, 21, 11, 58); // Year is 2024, month is 0-indexed
-        const formattedDateTime = departureDate.toISOString().slice(0, 16); // Format: YYYY-MM-DDTHH:mm
-        startingPointDeparture.value = formattedDateTime;
-    }
-
-    // Simulate Adding Stop 1
-    const addStopButton = document.querySelector('.add-stop');
-    if (addStopButton) {
-        // Simulate a user clicking the "+ Add stop" button
-        addStopButton.click();
-
-        // add delay to allow the stop to be added
-        setTimeout(() => {
-            // Find the newly added stop and set values
-            const lastStopContainer = document.querySelector('.stop-container');
-            if (lastStopContainer) {
-                const stopLocationInput = lastStopContainer.querySelector('.stop-location');
-                if (stopLocationInput) stopLocationInput.value = 'Worb Dorf';
-
-                const stopDurationInput = lastStopContainer.querySelector('.stop-duration');
-                if (stopDurationInput) stopDurationInput.value = 10;
-            }
-        }, 1000);
-    }
-
-    // Simulate Adding Via
-    const addViaButton = document.querySelector('.add-via');
-    if (addViaButton) {
-        // Simulate a user clicking the "+ Add via" button
-        addViaButton.click();
-
-        // Find the newly added via and set values
-        const lastViaInput = document.querySelector('.vias-container .via-location:last-of-type');
-        if (lastViaInput) {
-            lastViaInput.value = 'Bern, Egghölzli';
-        }
-    }
-
-    // Set Destination
-    const destinationInput = document.getElementById('destination-location');
-    if (destinationInput) {
-        destinationInput.value = 'Stettlen';
-    }
-
-    const destinationArrival = document.getElementById('destination-arrival');
-    if (destinationArrival) {
-        destinationArrival.placeholder = 'tt.mm.jjjj, --:--';
-    }
-}
-
-
-
+// Orchestral function to plan the entire journey and display the result
 async function planEntireJourney() {
     try {
         // Step 1: Collect input from the user
@@ -861,8 +819,9 @@ function addGeneralJourneyData(journeyConnections) {
 
 
 
+// ########################################################################################################################
+// FUNCTIONS FOR DISPLAYING THE RESULTS
 
-// Functions for displaying the results
 
 function displayResults(journeyConnections) {
     // Step 1: Select the #results-container in the DOM
@@ -1217,6 +1176,12 @@ function createDestinationContainer(journeyConnections) {
     // Step 6: Return the completed destination container
     return destinationContainer;
 }
+
+
+
+
+// ########################################################################################################################
+// FUNCTIONS TO SAVE AND LIST SAVED JOURNEYS
 
 
 // Function to save the journey to localStorage
