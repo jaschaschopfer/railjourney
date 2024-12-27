@@ -436,6 +436,18 @@ console.log("First connection:", journeyConnections.legs[0]); // Debug log
         // Step 8: Display the results
         displayResults(journeyConnections);
 
+         // Step 9: Show the save button and add event listener
+         const saveButton = document.querySelector('.save-journey-button');
+         saveButton.style.display = 'block';
+ 
+         // Add event listener to the save button
+         saveButton.addEventListener("click", () => {
+             saveJourney(journeyPlan, journeyConnections);
+         });
+
+         //STEP 10 TEMP: LIST THEM
+         listSavedJourneys();
+
     } catch (error) {
         console.error("Error planning the journey:", error);
         alert("An error occurred while planning the journey. Please try again.");
@@ -896,10 +908,22 @@ function createJourneyOverview(journeyConnections) {
     const overviewContainer = document.createElement("div");
     overviewContainer.classList.add("journey-overview");
 
-    // Step 3: Populate the journey overview container
+    // Step 3: Create and populate the journey overview title container
+    const titleContainer = document.createElement("div");
+    titleContainer.classList.add("journey-overview-title-container");
+
     const title = document.createElement("h2");
     title.textContent = "Your Journey";
 
+    const saveButton = document.createElement("button");
+    saveButton.textContent = "Save Journey";
+    saveButton.classList.add("save-journey-button");
+    saveButton.style.display = "none"; // Hide the button by default
+
+    titleContainer.appendChild(title);
+    titleContainer.appendChild(saveButton);
+
+    // Step 4: Populate the journey overview container
     const route = document.createElement("p");
     route.textContent = `${from} → ${to}`;
 
@@ -912,14 +936,14 @@ function createJourneyOverview(journeyConnections) {
     const timeRange = document.createElement("p");
     timeRange.textContent = `${formattedStartDate} ${formattedStartTime} → ${formattedEndDate} ${formattedEndTime}`;
 
-    // Step 4: Append the elements to the overview container
-    overviewContainer.appendChild(title);
+    // Step 5: Append the elements to the overview container
+    overviewContainer.appendChild(titleContainer); // Add the title container
     overviewContainer.appendChild(route);
     overviewContainer.appendChild(duration);
     overviewContainer.appendChild(stayDuration);
     overviewContainer.appendChild(timeRange);
 
-    // Step 5: Return the completed container
+    // Step 6: Return the completed container
     return overviewContainer;
 }
 
@@ -1180,3 +1204,99 @@ function createDestinationContainer(journeyConnections) {
     // Step 6: Return the completed destination container
     return destinationContainer;
 }
+
+
+// Function to save the journey to localStorage
+function saveJourney(journeyPlan, journeyConnections) {
+    try {
+        // Step 1: Build display fields
+        const from = journeyConnections.from;
+        const to = journeyConnections.to;
+        const startingDateTime = new Date(journeyConnections.startingDateTime);
+        const displayName = `${from} → ${to}`;
+        const displayDateTime = startingDateTime.toLocaleString('de-DE', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+
+        // Step 2: Create the Saved Journey Object
+        const newJourney = {
+            id: Date.now().toString(), // Unique ID
+            timestamp: Date.now(),    // Timestamp for sorting
+            displayName,              // User-friendly display name
+            displayDateTime,          // User-friendly date and time
+            journeyConnections        // Store the full journeyConnections
+        };
+
+        // Step 3: Retrieve existing saved journeys from localStorage
+        const savedJourneys = JSON.parse(localStorage.getItem('savedJourneys')) || [];
+
+        // Step 4: Append the new journey to the array
+        savedJourneys.push(newJourney);
+
+        // Step 5: Save the updated array back to localStorage
+        localStorage.setItem('savedJourneys', JSON.stringify(savedJourneys));
+
+        console.log("Journey saved successfully:", newJourney); // Debug log
+
+    } catch (error) {
+        console.error("Error saving journey:", error);
+    }
+}
+
+function listSavedJourneys() {
+    // Step 1: Retrieve saved journeys from local storage
+    const savedJourneysString = localStorage.getItem("savedJourneys");
+    const savedJourneys = savedJourneysString ? JSON.parse(savedJourneysString) : [];
+
+    // Step 2: Get the container element and clear any existing content
+    const container = document.getElementById("saved-journeys-list");
+    container.innerHTML = ""; // Clear previous list
+
+    // Step 3: Check if there are saved journeys
+    if (savedJourneys.length === 0) {
+        const noJourneyMessage = document.createElement("p");
+        noJourneyMessage.textContent = "No saved journeys available.";
+        container.appendChild(noJourneyMessage);
+        return;
+    }
+
+    // Step 4: Sort journeys by departure timestamp (earliest to latest)
+    savedJourneys.sort((a, b) => {
+        const timestampA = a.journeyConnections.legs[0].from.departureTimestamp;
+        const timestampB = b.journeyConnections.legs[0].from.departureTimestamp;
+        return timestampA - timestampB;
+    });
+
+    // Step 5: Create a list for each journey
+    savedJourneys.forEach((journey) => {
+        const journeyItem = document.createElement("div");
+        journeyItem.classList.add("saved-journey-item");
+
+        // Add journey title (displayName)
+        const journeyTitle = document.createElement("p");
+        journeyTitle.textContent = journey.displayName;
+        journeyItem.appendChild(journeyTitle);
+
+        // Add journey date and time (displayDateTime)
+        const journeyDateTime = document.createElement("p");
+        journeyDateTime.textContent = journey.displayDateTime;
+        journeyItem.appendChild(journeyDateTime);
+
+        // Add "Load Journey" button
+        const loadButton = document.createElement("button");
+        loadButton.textContent = "Load Journey";
+        loadButton.classList.add("load-journey-button");
+        loadButton.dataset.id = journey.id; // Attach journey ID to button
+        loadButton.addEventListener("click", () => loadJourneyFromLocalStorage(journey.id));
+        journeyItem.appendChild(loadButton);
+
+        // Append the journey item to the container
+        container.appendChild(journeyItem);
+    });
+}
+
+

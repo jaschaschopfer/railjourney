@@ -109,6 +109,12 @@ input:focus {
     margin-bottom: 20px;
 }
 
+.journey-overview-title-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .results-starting-point-container, .results-connection-container, .results-stop-container, .results-destination-container {
     background-color: #e3f2fd;
     padding: 10px;
