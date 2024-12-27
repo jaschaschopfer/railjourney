@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Journey Planner</title>
+    <title>railjourney - Plan your multistop journey now! </title>
     <link rel="stylesheet" href="/css/styles.css">
     <script src="/js/scripts.js" defer></script>
 </head>
@@ -19,7 +19,16 @@
                 </div>
                 <div class="input-container">
                     <div class="location-input-container">
-                        <input type="text" class="location-input" id="starting-point-location" placeholder="Enter starting location">
+                        <!-- WRAPPER START -->
+                        <div class="location-input-wrapper">
+                            <input 
+                                type="text"
+                                class="location-input"
+                                id="starting-point-location"
+                                placeholder="Enter starting location"
+                            >
+                        </div>
+                        <!-- WRAPPER END -->
                     </div>
                     <div class="departure-arrival-time-container">
                         <input type="datetime-local" id="starting-point-departure" placeholder="Set departure time">
@@ -43,7 +52,16 @@
                 </div>
                 <div class="input-container">
                     <div class="location-input-container">
-                        <input type="text" class="location-input" id="destination-location" placeholder="Enter destination">
+                        <!-- WRAPPER START -->
+                        <div class="location-input-wrapper">
+                            <input
+                                type="text"
+                                class="location-input"
+                                id="destination-location"
+                                placeholder="Enter destination"
+                            >
+                        </div>
+                        <!-- WRAPPER END -->
                     </div>
                     <div class="departure-arrival-time-container">
                         <input type="datetime-local" id="destination-arrival" placeholder="Set arrival time" class="hidden">

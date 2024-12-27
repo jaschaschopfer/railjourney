@@ -75,23 +75,26 @@ let stopCounter = 1; // To track the number of stops dynamically
 
 // Function to handle the "Add via" click event
 function handleAddVia(event) {
-    // Find the nearest inbetween-stops-container for this button
+    // Find the nearest inbetween-stops-container...
     const inbetweenStopsContainer = event.target.closest('.inbetween-stops-container');
-    if (!inbetweenStopsContainer) return; // Safety check
+    if (!inbetweenStopsContainer) return;
 
-    // Find the vias-container within this inbetween-stops-container
     const viasContainer = inbetweenStopsContainer.querySelector('.vias-container');
-    if (!viasContainer) return; // Safety check
+    if (!viasContainer) return;
 
     const existingVias = viasContainer.querySelectorAll('.via');
     if (existingVias.length >= 5) {
-        alert("You can only add up to 5 vias per section."); // Notify the user
-        return; // Prevent adding more vias
+        alert("You can only add up to 5 vias per section.");
+        return;
     }
 
     // Create a new via element
     const viaElement = document.createElement('div');
     viaElement.classList.add('via');
+
+    // Create the wrapper
+    const viaInputWrapper = document.createElement('div');
+    viaInputWrapper.classList.add('location-input-wrapper');
 
     // Add input field for via location
     const viaInput = document.createElement('input');
@@ -100,18 +103,19 @@ function handleAddVia(event) {
     viaInput.placeholder = 'Enter via location';
     viaInput.addEventListener('input', handleLocationInput);
 
+    // Place the input inside the wrapper
+    viaInputWrapper.appendChild(viaInput);
+
     // Add remove button for the via
     const removeButton = document.createElement('button');
     removeButton.classList.add('remove-via');
     removeButton.textContent = 'Remove';
-
-    // Attach event listener to the remove button
     removeButton.addEventListener('click', () => {
-        viaElement.remove(); // Remove the via element from the DOM
+        viaElement.remove();
     });
 
-    // Append input and remove button to the via element
-    viaElement.appendChild(viaInput);
+    // Construct the final structure
+    viaElement.appendChild(viaInputWrapper);
     viaElement.appendChild(removeButton);
 
     // Append the via element to the vias-container
@@ -154,19 +158,16 @@ function createStopContainer() {
 
     // Add the stop title and remove button
     const stopTitle = document.createElement('h2');
-    stopTitle.textContent = `Stop ${stopCounter++}`; // Dynamically set the stop number
+    stopTitle.textContent = `Stop ${stopCounter++}`;
     const removeButton = document.createElement('button');
     removeButton.classList.add('remove-stop');
     removeButton.textContent = 'Remove';
-
-    // Attach event listener to the remove button
     removeButton.addEventListener('click', () => {
-        stopContainer.nextElementSibling.remove(); // Remove the associated inbetween-stops-container
-        stopContainer.remove(); // Remove the stop-container itself
-        renumberStops(); // Renumber remaining stops
+        stopContainer.nextElementSibling.remove(); // remove the inbetween-stops-container
+        stopContainer.remove();
+        renumberStops();
     });
 
-    // Append title and button to the title container
     titleContainer.appendChild(stopTitle);
     titleContainer.appendChild(removeButton);
 
@@ -177,12 +178,20 @@ function createStopContainer() {
     // Add the location input
     const locationInputContainer = document.createElement('div');
     locationInputContainer.classList.add('location-input-container');
+
+    // Create the wrapper
+    const locationInputWrapper = document.createElement('div');
+    locationInputWrapper.classList.add('location-input-wrapper');
+
     const locationInput = document.createElement('input');
     locationInput.type = 'text';
     locationInput.classList.add('stop-location', 'location-input');
     locationInput.placeholder = 'Enter stop location';
     locationInput.addEventListener('input', handleLocationInput);
-    locationInputContainer.appendChild(locationInput);
+
+    // Append the input into the wrapper, then the wrapper into the container
+    locationInputWrapper.appendChild(locationInput);
+    locationInputContainer.appendChild(locationInputWrapper);
 
     // Add the duration input
     const durationInputContainer = document.createElement('div');
@@ -193,11 +202,11 @@ function createStopContainer() {
     durationInput.placeholder = 'Min stay (minutes)';
     durationInputContainer.appendChild(durationInput);
 
-    // Append inputs to the input container
+    // Assemble the input container
     inputContainer.appendChild(locationInputContainer);
     inputContainer.appendChild(durationInputContainer);
 
-    // Append the title container and input container to the stop container
+    // Final assembly of stopContainer
     stopContainer.appendChild(titleContainer);
     stopContainer.appendChild(inputContainer);
 
@@ -304,40 +313,43 @@ async function fetchSuggestions(query) {
 
 // Function to display suggestions in a dropdown
 function displaySuggestions(inputField, suggestions) {
-    // Clear existing suggestions
+    // Clear existing suggestions first
     clearSuggestions(inputField);
 
     // Create a dropdown for suggestions
     const dropdown = document.createElement('div');
     dropdown.classList.add('suggestions-dropdown');
 
-    // Populate the dropdown with suggestion items
+    // Populate the dropdown
     suggestions.forEach(station => {
         const suggestionItem = document.createElement('div');
         suggestionItem.classList.add('suggestion-item');
         suggestionItem.textContent = station.name;
-
-        // Handle click on a suggestion
         suggestionItem.addEventListener('click', () => {
-            inputField.value = station.name; // Set the input value to the selected station
-            clearSuggestions(inputField); // Clear the suggestions dropdown
+            inputField.value = station.name;
+            clearSuggestions(inputField);
         });
-
         dropdown.appendChild(suggestionItem);
     });
 
-    // Append the dropdown below the input field
-    inputField.parentNode.appendChild(dropdown);
-}
-
-// Function to clear suggestions
-function clearSuggestions(inputField) {
-    const dropdown = inputField.parentNode.querySelector('.suggestions-dropdown');
-    if (dropdown) {
-        dropdown.remove();
+    // Append the dropdown to the wrapper
+    const wrapper = inputField.closest('.location-input-wrapper');
+    if (wrapper) {
+        wrapper.appendChild(dropdown);
+    } else {
+        // Fallback if no wrapper found (shouldn't happen with the new structure)
+        inputField.parentNode.appendChild(dropdown);
     }
 }
 
+function clearSuggestions(inputField) {
+    const wrapper = inputField.closest('.location-input-wrapper');
+    if (!wrapper) return;
+    const existingDropdown = wrapper.querySelector('.suggestions-dropdown');
+    if (existingDropdown) {
+        existingDropdown.remove();
+    }
+}
 
 
 

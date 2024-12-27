@@ -129,18 +129,42 @@ input:focus {
 }
 
 .via {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 10px;
+display: flex;
+align-items: center;
+position: relative; /* So we can absolutely position the dropdown here */
+}
+
+.location-input-wrapper {
+    position: relative; /* So the dropdown can be absolutely positioned inside */
+flex: 1; /* Take up all available space */
+}
+
+.suggestions-dropdown {
+position: absolute;
+top: 100%;   /* Just below the input */
+left: 0;
+width: 100%; /* Match the input width */
+background: #fff;
+border: 1px solid #ccc;
+box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+z-index: 10; /* So it sits above other elements */
+}
+
+.suggestion-item {
+padding: 6px 8px;
+cursor: pointer;
+}
+
+.suggestion-item:hover {
+background-color: #f0f0f0;
 }
 
 .stop-container {
-    background-color: #f1f8e9;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+background-color: #f1f8e9;
+padding: 10px;
+border-radius: 8px;
+margin-bottom: 20px;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Results Styles */
