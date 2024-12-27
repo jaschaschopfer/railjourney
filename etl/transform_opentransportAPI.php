@@ -37,19 +37,16 @@ if ($action === 'fetchStations') {
     // Fetch GET data
     $from = $_GET['from'] ?? null;
     $to = $_GET['to'] ?? null;
-    $departureTime = $_GET['departureTime'] ?? null;
+    $date = $_GET['date'] ?? null; // Fetch date as a separate parameter
+    $time = $_GET['time'] ?? null; // Fetch time as a separate parameter
     $vias = $_GET['via'] ?? [];
 
-    if (!$from || !$to || !$departureTime) {
+    // Validate required parameters
+    if (!$from || !$to || !$date || !$time) {
         http_response_code(400); // Bad Request
         echo json_encode(['error' => 'Missing required parameters.']);
         exit;
     }
-
-    // Split departureTime into date and time
-    $dateTime = explode('T', $departureTime);
-    $date = $dateTime[0] ?? date('Y-m-d'); // Default to today
-    $time = $dateTime[1] ?? date('H:i');   // Default to current time
 
     // Construct "via" query string
     $viaQuery = '';
@@ -63,8 +60,8 @@ if ($action === 'fetchStations') {
     $url = "http://transport.opendata.ch/v1/connections?"
          . "from=" . urlencode($from)
          . "&to=" . urlencode($to)
-         . "&date=" . urlencode($date)
-         . "&time=" . urlencode($time)
+         . "&date=" . urlencode($date) // Use the date parameter
+         . "&time=" . urlencode($time) // Use the time parameter
          . $viaQuery;
 
     // Log the constructed URL for debugging
@@ -81,3 +78,4 @@ else {
     echo json_encode(['error' => 'Invalid action parameter']);
     exit;
 }
+?>

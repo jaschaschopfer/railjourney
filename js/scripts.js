@@ -453,13 +453,14 @@ console.log("Previous Connection 'to':", previousConnection?.to);
         }
 
         // Step 1: Get the previous connection's arrival time
-        const previousArrivalTimeISO = previousConnection.to.arrivalTimestamp;
-        if (!previousArrivalTimeISO) {
+        const previousArrivalTime = previousConnection.to.arrivalTimestamp;
+        console.log("Previous Arrival TimeISO:", previousArrivalTime); // Debug log
+        if (!previousArrivalTime) {
             throw new Error("Arrival time is missing in the previous connection.");
         }
 
         // Step 2: Calculate the next departure time
-        const departureTime = calculateNextDepartureTime(previousArrivalTimeISO, stayDuration);
+        const departureTime = calculateNextDepartureTime(previousArrivalTime, stayDuration);
         console.log("Next Departure Time:", departureTime); // Debug log
 
         // Step 3: Determine the destination for this leg
@@ -624,6 +625,11 @@ function prepareFirstQuery(journeyPlan) {
     const from = journeyPlan.startingPoint.name;
     const departureTime = journeyPlan.startingPoint.departureTime;
 
+    // Parse departureTime into date and time components
+    const departureDateObj = new Date(departureTime);
+    const date = departureDateObj.toISOString().slice(0, 10); // Format YYYY-MM-DD
+    const time = departureDateObj.toTimeString().slice(0, 5); // Format HH:mm
+
     // Determine the first destination
     let to;
     if (journeyPlan.stops.length > 0) {
@@ -639,9 +645,11 @@ function prepareFirstQuery(journeyPlan) {
     const queryParams = {
         from,
         to,
-        departureTime,
+        date, // Use the parsed date
+        time, // Use the parsed time
         via
     };
+
     console.log('First query:', queryParams); // Log the query object
 
     return queryParams;
@@ -670,36 +678,51 @@ async function planFirstConnection(journeyPlan, journeyConnections) {
     }
 }
 
-function calculateNextDepartureTime(previousArrivalISO, stayDuration) {
-    console.log("Previous Arrival (UNIX):", previousArrivalISO); // Debug log
+function calculateNextDepartureTime(previousArrival, stayDuration) {
+    console.log("Previous Arrival gotten in CALCNEXTDEPART:", previousArrival); // Debug log
     console.log("Stay Duration:", stayDuration); // Debug log
 
     // Convert previousArrival from seconds to milliseconds ((BECAUSE OF UNIX FORMAT)) and create a Date object
-    const previousArrivalTime = new Date(previousArrivalISO * 1000);
+    const previousArrivalTime = new Date(previousArrival    * 1000);
 
     console.log("Previous Arrival Time (Date):", previousArrivalTime.toISOString()); // Debug log
 
     // Add stayDuration (in minutes) to the arrival time
     const nextDepartureTime = new Date(previousArrivalTime.getTime() + stayDuration * 60000);
 
-    console.log("Next Departure Time:", nextDepartureTime.toISOString()); // Debug log
+    console.log("Next Departure Time calculated:", nextDepartureTime.toISOString()); // Debug log
 
     // Return the new departure time as an ISO string
     return nextDepartureTime.toISOString();
 }
 
-
+//gets departureTime in ISO format, converts it to MEZ and splits it into date and time
 function prepareNextQuery(from, to, departureTime, via = []) {
+    // Convert the ISO departureTime to MEZ date and time
+    const departureDate = new Date(departureTime);
+
+    // Adjust to MEZ timezone (+1)
+    const MEZOffset = 60 * 60 * 1000; // 1 hour in milliseconds
+    const MEZTime = new Date(departureDate.getTime() + MEZOffset);
+
+    // Format the date and time for the API
+    const date = MEZTime.toISOString().split('T')[0]; // Extract YYYY-MM-DD
+    const time = MEZTime.toISOString().split('T')[1].substring(0, 5); // Extract hh:mm
+
+    console.log("Converted Departure Time to MEZ:", { date, time }); // Debug log
+
     // Construct the query object
     const queryParams = {
         from,               // Starting point of the leg
         to,                 // Destination for this leg
-        departureTime,      // Time to depart
+        date,               // Date in YYYY-MM-DD format
+        time,               // Time in hh:mm format
         via                 // Optional via locations (empty by default)
     };
 
     return queryParams;
 }
+
 
 async function fetchConnections(queryParams) {
     try {
@@ -710,7 +733,7 @@ async function fetchConnections(queryParams) {
             .map(via => `via[]=${encodeURIComponent(via)}`)
             .join('&');
 
-        const queryString = `from=${encodeURIComponent(queryParams.from)}&to=${encodeURIComponent(queryParams.to)}&departureTime=${encodeURIComponent(queryParams.departureTime)}${viaQueryString ? `&${viaQueryString}` : ''}`;
+        const queryString = `from=${encodeURIComponent(queryParams.from)}&to=${encodeURIComponent(queryParams.to)}&date=${encodeURIComponent(queryParams.date)}&time=${encodeURIComponent(queryParams.time)}${viaQueryString ? `&${viaQueryString}` : ''}`;
 
         const url = `${baseUrl}&${queryString}`;
 
@@ -783,9 +806,14 @@ function addGeneralJourneyData(journeyConnections) {
         const previousArrival = journeyConnections.legs[i - 1].to.arrivalTimestamp;
         const currentDeparture = journeyConnections.legs[i].from.departureTimestamp;
 
-        if (previousArrival && currentDeparture) {
+        // Skip invalid timestamps
+        if (previousArrival && currentDeparture && currentDeparture > previousArrival) {
             const stayDuration = (currentDeparture - previousArrival) / 60; // Convert seconds to minutes
             totalStayDuration += stayDuration;
+        } else {
+            console.warn(
+                `Invalid timestamps for leg ${i}: Previous Arrival: ${previousArrival}, Current Departure: ${currentDeparture}`
+            );
         }
     }
 
@@ -804,6 +832,7 @@ function addGeneralJourneyData(journeyConnections) {
 
     console.log("Updated journeyConnections with General Journey Data:", journeyConnections); // Debug log
 }
+
 
 
 
