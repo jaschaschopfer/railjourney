@@ -1,37 +1,51 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Set the default departure time to the current time
+    // Set default departure time
     const departureInput = document.getElementById('starting-point-departure');
     if (departureInput) {
         const now = new Date();
-        const formattedDateTime = now.toISOString().slice(0, 16); // Format: YYYY-MM-DDTHH:mm
+        const formattedDateTime = now.toISOString().slice(0, 16);
         departureInput.value = formattedDateTime;
 
         // Calculate the min date (9 calendar days ago)
         const nineDaysAgo = new Date(now);
         nineDaysAgo.setDate(nineDaysAgo.getDate() - 9);
-        nineDaysAgo.setHours(0, 0, 0, 0); // Set to 00:00 of that day
-        const formattedMinDateTime = nineDaysAgo.toISOString().slice(0, 16);
-        departureInput.min = formattedMinDateTime;
+        nineDaysAgo.setHours(0, 0, 0, 0);
+        departureInput.min = nineDaysAgo.toISOString().slice(0, 16);
     }
 
-    // Attach event listener to all "Add via" buttons
-    document.querySelectorAll('.add-via').forEach(button => {
-        button.addEventListener('click', handleAddVia);
-    });
-
-    // Attach event listener to all "Add stop" buttons
-    document.querySelectorAll('.add-stop').forEach(button => {
-        button.addEventListener('click', handleAddStop);
-    });
-
-    // Attach event listeners to all existing location-input fields
-    document.querySelectorAll('.location-input').forEach(input => {
-        input.addEventListener('input', handleLocationInput);
-    });
-
-    // Attach event listener to the "Plan journey" button
+    // Attach event listeners
+    document.querySelectorAll('.add-via').forEach(button => button.addEventListener('click', handleAddVia));
+    document.querySelectorAll('.add-stop').forEach(button => button.addEventListener('click', handleAddStop));
+    document.querySelectorAll('.location-input').forEach(input => input.addEventListener('input', handleLocationInput));
     document.querySelector('#plan-journey-button').addEventListener('click', planEntireJourney);
-    
+
+    // Tab navigation functionality
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabs = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetTab = button.getAttribute('data-tab');
+
+            // Hide all tabs and remove active class from all buttons
+            tabs.forEach(tab => tab.classList.remove('visible'));
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+
+            // Show target tab and mark button as active
+            document.getElementById(targetTab).classList.add('visible');
+            button.classList.add('active');
+
+            // Check if the "Your Journeys" tab is activated and refresh saved journeys
+            if (targetTab === 'saved-journeys-tab') {
+                listSavedJourneys();
+            }
+        });
+    });
+
+    // Default tab visibility
+    document.getElementById('new-journey-tab').classList.add('visible');
+
+    // Load saved journeys
     listSavedJourneys();
 });
 
@@ -1262,6 +1276,11 @@ function listSavedJourneys() {
     const container = document.getElementById("saved-journeys-list");
     container.innerHTML = ""; // Clear any existing content
 
+    // Display the title "Your Journeys"
+    const titleElement = document.createElement("h2");
+    titleElement.textContent = "Your Journeys";
+    container.appendChild(titleElement);
+
     // Create an entry for each journey
     savedJourneys.forEach((journey) => {
         // Create the journey item container
@@ -1307,21 +1326,40 @@ function loadJourneyFromLocalStorage(journeyId) {
 
 // Display the saved journey with the same logic as "displayResults" function
 function displaySavedJourney(journeyConnections) {
-    // Step 1: Select the #savedJourney-Container in the DOM
+    // Step 1: Select the #savedJourney-Container and the #saved-journeys-list in the DOM
     const savedJourneyContainer = document.querySelector("#saved-journey-container");
+    const savedJourneysList = document.querySelector("#saved-journeys-list");
 
     // Step 2: Clear any existing content in the container
     savedJourneyContainer.innerHTML = "";
 
-    // Step 3: Create and append the journey overview
+    // Step 3: Hide the saved journeys list
+    savedJourneysList.style.display = "none";
+
+    // Step 5: Add a "Back to List" button
+    const backButton = document.createElement("button");
+    backButton.innerHTML = "← Back";
+    backButton.classList.add("back-to-list-button");
+    backButton.addEventListener("click", () => {
+        // Show the saved journeys list and reset the title
+        savedJourneysList.style.display = "block";
+
+        // Clear the saved journey container
+        savedJourneyContainer.innerHTML = "";
+    });
+
+    // Append the button to the container
+    savedJourneyContainer.appendChild(backButton);
+
+    // Step 6: Create and append the journey overview
     const journeyOverview = createJourneyOverview(journeyConnections);
     savedJourneyContainer.appendChild(journeyOverview);
 
-    // Step 4: Create and append the starting point container
+    // Step 7: Create and append the starting point container
     const startingPointContainer = createStartingPointContainer(journeyConnections);
     savedJourneyContainer.appendChild(startingPointContainer);
 
-    // Step 5: Iterate over each leg and render connections and stops
+    // Step 8: Iterate over each leg and render connections and stops
     journeyConnections.legs.forEach((leg, index) => {
         // Create and append the connection container for the leg
         const connectionContainer = createConnectionContainer(leg);
@@ -1334,7 +1372,8 @@ function displaySavedJourney(journeyConnections) {
         }
     });
 
-    // Step 6: Create and append the destination container
+    // Step 9: Create and append the destination container
     const destinationContainer = createDestinationContainer(journeyConnections);
     savedJourneyContainer.appendChild(destinationContainer);
 }
+

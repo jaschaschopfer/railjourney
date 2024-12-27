@@ -29,6 +29,45 @@ button:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
+#tab-navigation {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    background-color: #f1f1f1;
+    border-top: 1px solid #ccc;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    text-align: center;
+}
+
+.tab-button.active {
+    background-color: #e0e0e0;
+    font-weight: bold;
+}
+
+.tab-content {
+    display: none;
+    padding: 20px;
+    margin-bottom: 60px; /* Leave space for tab navigation */
+}
+
+.tab-content.visible {
+    display: block;
+}
+
+.hidden {
+    display: none;
+}
+
 input {
     width: 100%;
     padding: 10px;

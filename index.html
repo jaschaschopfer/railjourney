@@ -8,7 +8,8 @@
     <script src="/js/scripts.js" defer></script>
 </head>
 <body>
-    <div id="new-journey-tab">
+    <!-- Tab Content -->
+    <div id="new-journey-tab" class="tab-content">
         <!-- Input Blocks Container -->
         <div id="input-blocks-container">
             <!-- Starting Point Container -->
@@ -28,16 +29,12 @@
 
             <!-- In-Between Stops Container -->
             <div class="inbetween-stops-container">
-                <!-- Vias Container -->
                 <div class="vias-container"></div>
-                <!-- Add Buttons Container -->
                 <div class="add-container">
                     <button class="add-via">+ Add via</button>
                     <button class="add-stop">+ Add stop</button>
                 </div>
             </div>
-
-            <!-- Stops Container are added here as divs class="stop-container" -->
 
             <!-- Destination Container -->
             <div id="destination-container">
@@ -53,22 +50,21 @@
                     </div>
                 </div>
             </div>
-            <!-- Let's Go Button -->
-        <button id="plan-journey-button">Let's Go!</button>
-        </div>
 
-        <!-- Results Container -->
+            <button id="plan-journey-button">Let's Go!</button>
+        </div>
         <div id="results-container"></div>
     </div>
 
-    <div id="saved-journeys-tab">
-        <h2>Your Journeys</h2>
-        <div id="saved-journeys-list" class="saved-journeys-container">
-            <!-- Saved journeys will be dynamically added here -->
-        </div>
-        <div id="saved-journey-container">
-            <!-- Chosen journey will be dynamically displayed here-->
-        </div>
+    <div id="saved-journeys-tab" class="tab-content hidden">
+        <div id="saved-journeys-list"></div>
+        <div id="saved-journey-container"></div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div id="tab-navigation">
+        <button class="tab-button active" data-tab="new-journey-tab">Plan Journey</button>
+        <button class="tab-button" data-tab="saved-journeys-tab">Your Journeys</button>
     </div>
 </body>
 </html>
