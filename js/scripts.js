@@ -1047,13 +1047,15 @@ function createSectionContainer(section) {
         // This is a walk section
         sectionContainer.classList.add("results-connection-walksection-container");
 
-        // Calculate walk duration if missing
-        let walkDuration = section.walk.duration;
-        if (!walkDuration && section.departure?.departureTimestamp && section.arrival?.arrivalTimestamp) {
+        // Always calculate walk duration because API has false walk durations
+        let walkDuration = 0; // Initialize with default value
+        if (section.departure?.departureTimestamp && section.arrival?.arrivalTimestamp) {
             walkDuration = Math.round(
                 (section.arrival.arrivalTimestamp - section.departure.departureTimestamp) / 60 // Convert seconds to minutes
             );
         }
+        console.log("Calculated Walk Duration:", walkDuration); // Debug log
+
 
         // Create walk details
         const walkInfo = document.createElement("p");
