@@ -1287,16 +1287,39 @@ function listSavedJourneys() {
         const journeyItem = document.createElement("div");
         journeyItem.classList.add("saved-journey-item");
         journeyItem.dataset.id = journey.id; // Attach the journey ID
+        journeyItem.style.display = "flex"; // Flex for layout
+        journeyItem.style.justifyContent = "space-between";
+        journeyItem.style.alignItems = "center";
+        journeyItem.style.padding = "10px 0"; // Add spacing between items
+
+        // Left side: Journey title and date
+        const journeyDetails = document.createElement("div");
 
         // Add the journey display name
         const displayName = document.createElement("p");
         displayName.textContent = journey.displayName;
-        journeyItem.appendChild(displayName);
+        journeyDetails.appendChild(displayName);
 
         // Add the journey date/time
         const displayDateTime = document.createElement("p");
         displayDateTime.textContent = journey.displayDateTime;
-        journeyItem.appendChild(displayDateTime);
+        journeyDetails.appendChild(displayDateTime);
+
+        // Add the details to the left container
+        journeyItem.appendChild(journeyDetails);
+
+        // Right side: Remove button
+        const removeButton = document.createElement("button");
+        removeButton.textContent = "Remove";
+        removeButton.classList.add("remove-button");
+        removeButton.style.marginLeft = "10px"; // Space from the journey details
+        removeButton.addEventListener("click", (e) => {
+            e.stopPropagation(); // Prevent the journey from being loaded
+            confirmAndRemoveJourney(journey.id, journey.displayName);
+        });
+
+        // Add the remove button to the journey item
+        journeyItem.appendChild(removeButton);
 
         // Attach click event to load the journey
         journeyItem.addEventListener("click", () => {
@@ -1322,6 +1345,25 @@ function loadJourneyFromLocalStorage(journeyId) {
         console.error("Journey not found!");
         alert("Journey not found.");
     }
+}
+
+// Ask the user for confirmation before removing a journey
+function confirmAndRemoveJourney(journeyId, displayName) {
+    const isConfirmed = confirm(`Are you sure you want to remove the journey "${displayName}"?`);
+    if (isConfirmed) {
+        removeJourneyFromLocalStorage(journeyId);
+    }
+}
+
+// Remove Journey from Local Storage
+function removeJourneyFromLocalStorage(journeyId) {
+    const journeysString = localStorage.getItem("savedJourneys");
+    const savedJourneys = journeysString ? JSON.parse(journeysString) : [];
+    const updatedJourneys = savedJourneys.filter((journey) => journey.id !== journeyId);
+    localStorage.setItem("savedJourneys", JSON.stringify(updatedJourneys));
+
+    // Refresh the list after removal
+    listSavedJourneys();
 }
 
 // Display the saved journey with the same logic as "displayResults" function
