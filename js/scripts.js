@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Attach event listener to the "Plan journey" button
     document.querySelector('#plan-journey-button').addEventListener('click', planEntireJourney);
+    
+    listSavedJourneys();
 });
 
 let stopCounter = 1; // To track the number of stops dynamically
@@ -444,9 +446,6 @@ console.log("First connection:", journeyConnections.legs[0]); // Debug log
          saveButton.addEventListener("click", () => {
              saveJourney(journeyPlan, journeyConnections);
          });
-
-         //STEP 10 TEMP: LIST THEM
-         listSavedJourneys();
 
     } catch (error) {
         console.error("Error planning the journey:", error);
@@ -1248,55 +1247,94 @@ function saveJourney(journeyPlan, journeyConnections) {
 }
 
 function listSavedJourneys() {
-    // Step 1: Retrieve saved journeys from local storage
-    const savedJourneysString = localStorage.getItem("savedJourneys");
-    const savedJourneys = savedJourneysString ? JSON.parse(savedJourneysString) : [];
+    // Retrieve the saved journeys from local storage
+    const journeysString = localStorage.getItem("savedJourneys");
+    const savedJourneys = journeysString ? JSON.parse(journeysString) : [];
 
-    // Step 2: Get the container element and clear any existing content
-    const container = document.getElementById("saved-journeys-list");
-    container.innerHTML = ""; // Clear previous list
-
-    // Step 3: Check if there are saved journeys
-    if (savedJourneys.length === 0) {
-        const noJourneyMessage = document.createElement("p");
-        noJourneyMessage.textContent = "No saved journeys available.";
-        container.appendChild(noJourneyMessage);
-        return;
-    }
-
-    // Step 4: Sort journeys by departure timestamp (earliest to latest)
+    // Sort journeys by departure time
     savedJourneys.sort((a, b) => {
-        const timestampA = a.journeyConnections.legs[0].from.departureTimestamp;
-        const timestampB = b.journeyConnections.legs[0].from.departureTimestamp;
-        return timestampA - timestampB;
+        const timeA = a.journeyConnections.legs[0].from.departureTimestamp;
+        const timeB = b.journeyConnections.legs[0].from.departureTimestamp;
+        return timeA - timeB; // Ascending order
     });
 
-    // Step 5: Create a list for each journey
+    // Select the container for saved journeys
+    const container = document.getElementById("saved-journeys-list");
+    container.innerHTML = ""; // Clear any existing content
+
+    // Create an entry for each journey
     savedJourneys.forEach((journey) => {
+        // Create the journey item container
         const journeyItem = document.createElement("div");
         journeyItem.classList.add("saved-journey-item");
+        journeyItem.dataset.id = journey.id; // Attach the journey ID
 
-        // Add journey title (displayName)
-        const journeyTitle = document.createElement("p");
-        journeyTitle.textContent = journey.displayName;
-        journeyItem.appendChild(journeyTitle);
+        // Add the journey display name
+        const displayName = document.createElement("p");
+        displayName.textContent = journey.displayName;
+        journeyItem.appendChild(displayName);
 
-        // Add journey date and time (displayDateTime)
-        const journeyDateTime = document.createElement("p");
-        journeyDateTime.textContent = journey.displayDateTime;
-        journeyItem.appendChild(journeyDateTime);
+        // Add the journey date/time
+        const displayDateTime = document.createElement("p");
+        displayDateTime.textContent = journey.displayDateTime;
+        journeyItem.appendChild(displayDateTime);
 
-        // Add "Load Journey" button
-        const loadButton = document.createElement("button");
-        loadButton.textContent = "Load Journey";
-        loadButton.classList.add("load-journey-button");
-        loadButton.dataset.id = journey.id; // Attach journey ID to button
-        loadButton.addEventListener("click", () => loadJourneyFromLocalStorage(journey.id));
-        journeyItem.appendChild(loadButton);
+        // Attach click event to load the journey
+        journeyItem.addEventListener("click", () => {
+            loadJourneyFromLocalStorage(journey.id);
+        });
 
         // Append the journey item to the container
         container.appendChild(journeyItem);
     });
 }
 
+function loadJourneyFromLocalStorage(journeyId) {
+    // Retrieve saved journeys from local storage
+    const journeysString = localStorage.getItem("savedJourneys");
+    const savedJourneys = journeysString ? JSON.parse(journeysString) : [];
 
+    // Find the journey by ID
+    const foundJourney = savedJourneys.find(j => j.id === journeyId);
+    if (foundJourney) {
+        // Display the journey using the existing displayResults function
+        displaySavedJourney(foundJourney.journeyConnections);
+    } else {
+        console.error("Journey not found!");
+        alert("Journey not found.");
+    }
+}
+
+// Display the saved journey with the same logic as "displayResults" function
+function displaySavedJourney(journeyConnections) {
+    // Step 1: Select the #savedJourney-Container in the DOM
+    const savedJourneyContainer = document.querySelector("#saved-journey-container");
+
+    // Step 2: Clear any existing content in the container
+    savedJourneyContainer.innerHTML = "";
+
+    // Step 3: Create and append the journey overview
+    const journeyOverview = createJourneyOverview(journeyConnections);
+    savedJourneyContainer.appendChild(journeyOverview);
+
+    // Step 4: Create and append the starting point container
+    const startingPointContainer = createStartingPointContainer(journeyConnections);
+    savedJourneyContainer.appendChild(startingPointContainer);
+
+    // Step 5: Iterate over each leg and render connections and stops
+    journeyConnections.legs.forEach((leg, index) => {
+        // Create and append the connection container for the leg
+        const connectionContainer = createConnectionContainer(leg);
+        savedJourneyContainer.appendChild(connectionContainer);
+
+        // If there's a stop after this leg, create and append the stop container
+        if (index < journeyConnections.legs.length - 1) {
+            const stopContainer = createResultsStopContainer(index, journeyConnections);
+            savedJourneyContainer.appendChild(stopContainer);
+        }
+    });
+
+    // Step 6: Create and append the destination container
+    const destinationContainer = createDestinationContainer(journeyConnections);
+    savedJourneyContainer.appendChild(destinationContainer);
+}
