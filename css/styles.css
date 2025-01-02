@@ -4,7 +4,7 @@
     --rj-grey-light: #788da3;
     --rj-red: #fe440f;
     --rj-red-light: #ff5722;
-    --rj-red-very-light: #ffa6a4;
+    --rj-red-very-light: #ffe5e1;
     --light-grey: #f5f5f5;
     --input-border: #ddd;
 
@@ -13,14 +13,6 @@
 }
 
 /* General Styles */
-body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    margin: 10;
-    padding: 0;
-    background-color: var(--light-grey);
-    color: var(--rj-grey);
-}
-
 header {
     background-color: var(--light-grey);
     padding: 10px 0;
@@ -29,6 +21,24 @@ header {
     justify-content: space-around;
     height: 140px;
     width: 100%;
+}
+
+h1 {
+    position: absolute; /* Removes it from the document flow */
+    width: 1px; /* Shrinks its dimensions to almost nothing */
+    height: 1px;
+    overflow: hidden; /* Hides any content that might spill */
+    clip: rect(0 0 0 0); /* Clipping it to make it invisible */
+    clip-path: inset(100%); /* Alternative to `clip` for better support */
+    white-space: nowrap; /* Prevents line breaks */
+}
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    margin: 10;
+    padding: 0;
+    background-color: var(--light-grey);
+    color: var(--rj-grey);
 }
 
 h2, h3 {
@@ -92,8 +102,8 @@ button:hover {
     display: none;
 }
 
-/* Layout Containers */
-#input-blocks-container, #results-container {
+/* Layout Containers in both tabs */
+#input-blocks-container, #results-container, #saved-journeys-list, #saved-journey-container {
     max-width: var(--floating-tile-width);
     margin: 20px auto;
     background: #fff;
@@ -107,13 +117,12 @@ button:hover {
 }
 
 
-/* ########Details */
+/* Input Details */
 
 /* Titles */
 .title-container {
     display: flex;
     justify-content: space-between;
-    padding: 10px 20px;
     border-radius: 8px;
     margin-bottom: 10px;
 }
@@ -153,7 +162,6 @@ input:focus {
 
 #starting-point-container, #destination-container, .stop-container {
     margin: 15px 0;
-    border: 0px solid var(--rj-grey-light);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     border-radius: 15px;
     padding: 10px;
@@ -181,7 +189,6 @@ top: 100%;   /* Just below the input */
 left: 0;
 width: 100%; /* Match the input width */
 background: #fff;
-border: 1px solid #ccc;
 box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 z-index: 10; /* So it sits above other elements */
 }
@@ -195,7 +202,11 @@ cursor: pointer;
 background-color: #f0f0f0;
 }
 
-/* Results Styles */
+/* Results Details */
+#results-container {
+    display: none; /* Hide the container by default */
+}
+
 .results-connection-container {
     margin-bottom: 20px;
 }
@@ -206,8 +217,21 @@ background-color: #f0f0f0;
     justify-content: space-between;
 }
 
-.results-starting-point-container, .results-connection-container, .results-stop-container, .results-destination-container {
-    background-color: #e3f2fd;
+.results-starting-point-container, .results-stop-container, .results-destination-container {
+    background-color: var(--rj-grey);
+    color: var(--light-grey);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.results-starting-point-container h3, .results-stop-container h3, .results-destination-container h3 {
+    color: var(--light-grey);
+}
+
+.results-connection-container {
+    background-color: var(--light-grey);
     padding: 10px;
     border-radius: 8px;
     margin-bottom: 10px;
@@ -216,24 +240,26 @@ background-color: #f0f0f0;
 
 .results-section-container {
     padding: 10px;
-    border: 1px solid #cfd8dc;
     border-radius: 8px;
     margin-bottom: 10px;
-    background-color: #ffffff;
+    background-color: #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .results-connection-walksection-container {
-    background-color: #fff3e0;
+    background-color: var(--rj-red-very-light);
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid #ffe0b2;
     margin-bottom: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 
 /* Styling for SavedJourneys Tab */ 
+#saved-journey-container {
+    display: none; /* Hide the container by default */
+}
+
 .saved-journey-item {
     display: flex;
     justify-content: space-between;
@@ -246,16 +272,6 @@ background-color: #f0f0f0;
     margin: 0;
 }
 
-.remove-button {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 5px 10px;
-    cursor: pointer;
+.back-to-list-button {
+    margin-bottom: 20px;
 }
-
-.remove-button:hover {
-    background-color: #c0392b;
-}
-

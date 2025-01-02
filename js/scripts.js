@@ -355,7 +355,64 @@ function clearSuggestions(inputField) {
 
 // ########################################################################################################################
 // FUNCTIONS FOR SENDING THE INPUTS AND GETTING THE RESULTS
+// TEMPORARY FUNCTION FOR TESTING
+document.addEventListener('DOMContentLoaded', () => {
+    populateFieldsWithSimulatedUserInput();
+});
 
+function populateFieldsWithSimulatedUserInput() {
+    // Set Starting Point
+    const startingPointInput = document.getElementById('starting-point-location');
+    if (startingPointInput) {
+        startingPointInput.value = 'Bern';
+    }
+
+    const startingPointDeparture = document.getElementById('starting-point-departure');
+    if (startingPointDeparture) {
+        const departureDate = new Date(2024, 11, 31, 11, 58); // Year is 2024, month is 0-indexed
+        const formattedDateTime = departureDate.toISOString().slice(0, 16); // Format: YYYY-MM-DDTHH:mm
+        startingPointDeparture.value = formattedDateTime;
+    }
+
+    // Simulate Adding Stop 1
+    const addStopButton = document.querySelector('.add-stop');
+    if (addStopButton) {
+        // Simulate a user clicking the "+ Add stop" button
+        addStopButton.click();
+
+        // add delay to allow the stop to be added
+        setTimeout(() => {
+            // Find the newly added stop and set values
+            const lastStopContainer = document.querySelector('.stop-container');
+            if (lastStopContainer) {
+                const stopLocationInput = lastStopContainer.querySelector('.stop-location');
+                if (stopLocationInput) stopLocationInput.value = 'Thunstr. 13 Muri';
+
+                const stopDurationInput = lastStopContainer.querySelector('.stop-duration');
+                if (stopDurationInput) stopDurationInput.value = 10;
+            }
+        }, 1000);
+    }
+
+    // Simulate Adding Via
+    const addViaButton = document.querySelector('.add-via');
+    if (addViaButton) {
+        // Simulate a user clicking the "+ Add via" button
+        addViaButton.click();
+
+        // Find the newly added via and set values
+        const lastViaInput = document.querySelector('.vias-container .via-location:last-of-type');
+        if (lastViaInput) {
+            lastViaInput.value = 'Bern, Egghölzli';
+        }
+    }
+
+    // Set Destination
+    const destinationInput = document.getElementById('destination-location');
+    if (destinationInput) {
+        destinationInput.value = 'Stettlen';
+    }
+}
 
 // Orchestral function to plan the entire journey and display the result
 async function planEntireJourney() {
@@ -376,7 +433,7 @@ async function planEntireJourney() {
 
         // Step 4: Plan the first connection
         await planFirstConnection(journeyPlan, journeyConnections);
-console.log("First connection:", journeyConnections.legs[0]); // Debug log
+        console.log("First connection:", journeyConnections.legs[0]); // Debug log
 
         // Step 5: Handle subsequent stops
         for (let i = 1; i < journeyPlan.stops.length; i++) {
@@ -866,6 +923,9 @@ function displayResults(journeyConnections) {
     // Step 6: Create and append the destination container
     const destinationContainer = createDestinationContainer(journeyConnections);
     resultsContainer.appendChild(destinationContainer);
+
+    // Step 7: Show the results container
+    resultsContainer.style.display = "block";
 }
 
 function createJourneyOverview(journeyConnections) {
@@ -1230,6 +1290,7 @@ function saveJourney(journeyPlan, journeyConnections) {
         // Step 5: Save the updated array back to localStorage
         localStorage.setItem('savedJourneys', JSON.stringify(savedJourneys));
 
+        alert("Journey saved successfully!");
         console.log("Journey saved successfully:", newJourney); // Debug log
 
     } catch (error) {
@@ -1264,10 +1325,6 @@ function listSavedJourneys() {
         const journeyItem = document.createElement("div");
         journeyItem.classList.add("saved-journey-item");
         journeyItem.dataset.id = journey.id; // Attach the journey ID
-        journeyItem.style.display = "flex"; // Flex for layout
-        journeyItem.style.justifyContent = "space-between";
-        journeyItem.style.alignItems = "center";
-        journeyItem.style.padding = "10px 0"; // Add spacing between items
 
         // Left side: Journey title and date
         const journeyDetails = document.createElement("div");
@@ -1288,8 +1345,6 @@ function listSavedJourneys() {
         // Right side: Remove button
         const removeButton = document.createElement("button");
         removeButton.textContent = "Remove";
-        removeButton.classList.add("remove-button");
-        removeButton.style.marginLeft = "10px"; // Space from the journey details
         removeButton.addEventListener("click", (e) => {
             e.stopPropagation(); // Prevent the journey from being loaded
             confirmAndRemoveJourney(journey.id, journey.displayName);
@@ -1352,16 +1407,18 @@ function displaySavedJourney(journeyConnections) {
     // Step 2: Clear any existing content in the container
     savedJourneyContainer.innerHTML = "";
 
-    // Step 3: Hide the saved journeys list
+    // Step 3: Hide the saved journeys list and show the saved journey container
     savedJourneysList.style.display = "none";
+    savedJourneyContainer.style.display = "block";
 
     // Step 5: Add a "Back to List" button
     const backButton = document.createElement("button");
     backButton.innerHTML = "← Back";
     backButton.classList.add("back-to-list-button");
     backButton.addEventListener("click", () => {
-        // Show the saved journeys list and reset the title
+        // Show the saved journeys list and hide the saved journey container
         savedJourneysList.style.display = "block";
+        savedJourneyContainer.style.display = "none";
 
         // Clear the saved journey container
         savedJourneyContainer.innerHTML = "";
