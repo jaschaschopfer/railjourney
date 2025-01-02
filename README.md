@@ -1,26 +1,26 @@
 **RailJourney**  
 Plan your multi-stop train journey effortlessly.
 
+RailJourney offers a powerful and user-friendly way to plan, save, and view multi-step journeys with intermediate stops. Unlike standard apps such as SBB Mobile, this app provides the unique ability to add multiple stops with customizable stay durations. This eliminates the need to save multiple individual connections or perform repeated searches, streamlining the entire journey planning process. By integrating user inputs, the OpenTransport API, and local storage, the app delivers detailed step-by-step results for seamless travel management.
+
 ---
 
 ## Table of Contents
 
 1. [Overview](#overview)  
-2. [Features](#features)  
-3. [Getting Started](#getting-started)  
-4. [Usage](#usage)  
-5. [Project Structure](#project-structure)  
-6. [Technical Details](#technical-details)  
-7. [Saving & Loading Journeys](#saving--loading-journeys)  
-8. [Future Improvements](#future-improvements)  
-9. [License](#license)
+2. [Features](#features)
+3. [Usage](#usage)  
+4. [Project Structure](#project-structure)  
+5. [Technical Details](#technical-details)  
+6. [Saving & Loading Journeys](#saving--loading-journeys)  
+7. [Future Improvements](#future-improvements)  
 
 ---
 
 ## Overview
 
-**RailJourney** is a web application that helps you plan train trips with multiple stops (including “via” locations and “stay durations”). Users can:
-- Start from an origin station at a specific time or plan to arrive at a destination by a certain time.
+**RailJourney** is a web application that helps you plan train trips with multiple stops (including “via” locations and stops with stay durations). Users can:
+- Start from an origin station at a specific time.
 - Add intermediate stops, each with a desired minimum stay duration.
 - Incorporate “via” stations for each leg of the journey.
 - View a dynamically generated itinerary with route details, stop durations, and connection times.
@@ -33,31 +33,12 @@ The application uses an external OpenTransport API via a local endpoint (`/etl/t
 ## Features
 
 - **Auto-suggestions** for train stations: As you type, the app fetches station names from the OpenTransport API.  
-- **Multistop Journeys**: Add as many stops as you need, each with an optional stay duration.  
+- **Multistop Journeys**: Add as many stops as you need, each with a stay duration. RailJourney gets the best connections for you (earliest arrival).
 - **Via Locations**: Specify up to five “vias” for each journey leg.  
 - **Dynamic Timestamps**: Automatically handles your departure time in Central European Time and enforces constraints (e.g., not more than 9 days old).  
 - **Journey Overview**: Summaries include total travel time, total stay time, departure, and arrival details.  
 - **Save Journeys**: Keep a record of your planned itineraries in local storage.  
 - **Responsive UI**: The layout adjusts for desktop and mobile devices, with a tab navigation fixed at the bottom.
-
----
-
-## Getting Started
-
-1. **Clone or Download**  
-   - Clone the repository or download the ZIP file.
-
-2. **Web Server Setup**  
-   - Place the files in a local or remote web server environment.  
-   - Make sure `/etl/transform_opentransportAPI.php` is accessible on your server.  
-   - If you are running a local server (e.g., using XAMPP or Wamp), ensure you put the project files in the server’s document root (e.g., `htdocs`).
-
-3. **API Configuration**  
-   - By default, the app calls a PHP script (`transform_opentransportAPI.php`) which is expected to relay requests to the OpenTransport API.  
-   - Ensure that script is correctly configured with valid credentials or endpoints if needed.
-
-4. **Open the App**  
-   - Navigate to the root index page (e.g., `http://localhost/railjourney/index.html`) in your web browser.
 
 ---
 
@@ -157,16 +138,10 @@ The application uses an external OpenTransport API via a local endpoint (`/etl/t
 ## Future Improvements
 - **Refresh Journeys**: Allow users to refresh journeys to retrieve updated delays, platform changes, and real-time availability.
 - **Editing Journeys**: Allow users to modify saved journeys.
-- **Real-Time Updates**: Integrate websocket or SSE for live tracking of train delays.  
+- **Find Connections by Arrival Time**: Allow users to plan a journey based on desired arrival time instead of departure time.
 - **User Accounts**: Allow user authentication and cloud-based storage for journeys.
 
 ---
 
-## License
-
-This project is provided “as is,” without warranty of any kind. You are free to use, modify, and distribute this code for personal or commercial purposes unless otherwise specified by the OpenTransport API usage terms.  
-
----
-
-**Thank you for using RailJourney!** If you have any questions or feedback, feel free to open an issue or contribute to the repository. Safe travels!
+**Thank you for using RailJourney!** If you have any questions or feedback, feel free to open an issue or contribute to the repository. Happy travels!
 
