@@ -155,11 +155,9 @@ The application uses an external OpenTransport API via a local endpoint (`/etl/t
 ---
 
 ## Future Improvements
-
+- **Refresh Journeys**: Allow users to refresh journeys to retrieve updated delays, platform changes, and real-time availability.
+- **Editing Journeys**: Allow users to modify saved journeys.
 - **Real-Time Updates**: Integrate websocket or SSE for live tracking of train delays.  
-- **International Time Zone**: Dynamically detect and handle time zones, beyond the default MEZ.  
-- **Offline Support**: Cache certain static data (like station lookups) with Service Workers for improved offline usage.  
-- **Better Error Handling**: More informative UI error messages for failed requests or invalid inputs.  
 - **User Accounts**: Allow user authentication and cloud-based storage for journeys.
 
 ---
